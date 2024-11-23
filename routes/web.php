@@ -20,7 +20,9 @@ Route::view('/', 'welcome');
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
-Route::get('home', [HomeController::class, 'index'])->name('home');
+Route::get('home', [HomeController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('home');
 Route::get('browse', [BrowseController::class, 'index'])->name('browse');
 
 // Route::view('home', 'home')

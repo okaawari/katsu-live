@@ -12,3 +12,104 @@
 @tailwind components;
 @tailwind utilities;
 
+.custom-next, .custom-prev {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 13px;
+    cursor: pointer;
+    border-radius: 15px;
+    font-size: 16px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    user-select: none;
+    transition: 0.3s;
+}
+.custom-next:hover, .custom-prev:hover {
+    padding: 10px 20px;
+    user-select: none;
+    transition: 0.3s;
+}
+
+.custom-next {
+    right: 0px;
+    border-top-right-radius: 0;
+    border-end-end-radius: 0;
+}
+
+.custom-prev {
+    left: 0px;
+    border-start-start-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.custom-next:hover, .custom-prev:hover {
+    background-color: #2980b9;
+}
+a.swiper-slide {
+    display: block; /* or flex depending on your layout */
+}
+
+.swiper-scrollbar {
+    height: 8px; /* Set the height of the scrollbar */
+    background: #f0f0f0; /* Background color for the scrollbar track */
+    border-radius: 4px;
+    position: relative; /* Ensure it's positioned correctly */
+}
+
+    /* The draggable part of the scrollbar */
+.swiper-scrollbar {
+    height: 1px !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #374151 !important;
+    border-radius: 4px !important;
+}
+
+.swiper-scrollbar-drag {
+    background: #94a3b8 !important;
+    border-radius: 4px !important;
+}
+
+.swiper-scrollbar-drag:hover {
+    background: #64748b !important;
+}
+
+/* ::-webkit-scrollbar {
+    display: none;
+} */
+
+body {
+    --sb-track-color: #1f2937;
+    --sb-thumb-color: #111827;
+    --sb-size: 10px;
+}
+
+body::-webkit-scrollbar {
+    width: var(--sb-size)
+}
+
+body::-webkit-scrollbar-track {
+    background: var(--sb-track-color);
+    border-radius: none;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb-color);
+    border-radius: none;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    body {
+        scrollbar-color: var(--sb-thumb-color)
+                        var(--sb-track-color);
+    }
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}

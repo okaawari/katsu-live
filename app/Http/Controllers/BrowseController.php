@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Anime;
+use App\Models\Tag;
 
 class BrowseController extends Controller
 {
@@ -12,8 +15,25 @@ class BrowseController extends Controller
     public function index()
     {
         
+        $studios = Anime::select('studio')
+            ->whereNotNull('studio')
+            ->distinct()
+            ->pluck('studio');
 
-        return view('browse');
+        $years = Anime::selectRaw('DISTINCT YEAR(aired_at) as year')
+            ->whereNotNull('aired_at')
+            ->whereRaw('YEAR(aired_at) IS NOT NULL')
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        $tags = Tag::select('name')->orderBy('name')->pluck('name');
+        // $tags = Tag::all();
+
+        $animes = Anime::orderBy('created_at','desc')->paginate(24);
+
+        return view('browse', [
+            'animes' => $animes,
+        ],  compact('studios', 'years', 'tags'));
     }
 
     /**

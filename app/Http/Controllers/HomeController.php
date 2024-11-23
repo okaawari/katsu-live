@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Anime;
 use App\Models\Tag;
 
@@ -16,11 +17,18 @@ class HomeController extends Controller
         $animes = Anime::orderBy('created_at', 'desc')->take(10)->get();
         $animes1 = Anime::orderBy('created_at', 'asc')->take(12)->get();
         $animes2 = Anime::orderBy('views', 'desc')->take(12)->get();
+        $random = Cache::remember('random', 60, function() {
+            return Anime::where('name', 'like', '%1%')
+                ->inRandomOrder()
+                ->take(10)
+                ->get();
+        });
 
         return view('home', [
             'animes' => $animes,
             'animes1' => $animes1,
             'animes2' => $animes2,
+            'random' => $random,
         ]);
     }
 
