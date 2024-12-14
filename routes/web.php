@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\WatchController;
+use App\Http\Controllers\VideoProgressController;
 use App\Livewire\Search;
 
 /*
@@ -36,6 +37,9 @@ Route::get('watch/{id}', [WatchController::class, 'index'])
 // Route::view('home', 'home')
 //     ->middleware(['auth'])
 //     ->name('home');
+
+Route::post('/save-progress', [VideoProgressController::class, 'saveProgress']);
+Route::get('/get-progress/{animeId}', [VideoProgressController::class, 'getProgress']);
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

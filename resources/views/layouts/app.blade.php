@@ -14,8 +14,6 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @yield('styles')
-        <link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
-        <link rel="stylesheet" href="https://cdn.vidstack.io/player/video.css" />
         @yield('header-scripts')
     </head>
     <body class="font-sans antialiased">
@@ -38,7 +36,6 @@
         </div>
 
         @yield('scripts')
-        <script src="https://cdn.vidstack.io/player" type="module"></script>
         <livewire:layout.footer />
     </body>
 </html>

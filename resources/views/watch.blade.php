@@ -1,24 +1,29 @@
 <x-app-layout>
     <div class="flex flex-wrap max-w-[1400px] mx-auto px-4">
         <div class="relative w-full lg:basis-2/3 py-4">
-            <media-player title="{{ $anime->name }}" src="https://fukkatsu.club/storage/video/{{ $anime->stream_720 }}" playsinline>
-                <media-provider>
-                    <track
-                        src="{{ url('videos/test.vtt') }}"
-                        kind="subtitles"
-                        label="Mongolia"
-                        srclang="mn-MN"
-                        default
-                        data-type="vtt"
-                        />
-                    <media-poster
-                        class="vds-poster"
-                        src="https://files.vidstack.io/sprite-fight/poster.webp"
-                        alt="Girl walks into campfire with gnomes surrounding her friend ready for their next meal!"
-                        ></media-poster>
-                </media-provider>
-                <media-video-layout thumbnails="https://files.vidstack.io/sprite-fight/thumbnails.vtt"></media-video-layout>
-            </media-player>
+        <media-player 
+            title="{{ $anime->name }}" 
+            src="https://fukkatsu.club/storage/video/{{ $anime->stream_720 }}" 
+            playsinline>
+
+            <media-provider>
+                <track
+                    src="{{ url('videos/test.vtt') }}"
+                    kind="subtitles"
+                    label="Mongolia"
+                    srclang="mn-MN"
+                    default
+                    data-type="vtt"
+                />
+                <media-poster
+                    class="vds-poster"
+                    src="https://files.vidstack.io/sprite-fight/poster.webp"
+                    alt="Girl walks into campfire with gnomes surrounding her friend ready for their next meal!"
+                ></media-poster>
+            </media-provider>
+
+            <media-video-layout thumbnails="https://files.vidstack.io/sprite-fight/thumbnails.vtt"></media-video-layout>
+        </media-player>
             <div class="mb-2">
                 <h1 class="text-gray-300 text-xl font-semibold">{{ $anime->name }}</h1>
             </div>
@@ -97,7 +102,6 @@
             @endforeach
         </div>
     </div>
-</x-app-layout>
 
 @section('styles')
     <link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
@@ -114,4 +118,98 @@
 
 @section('scripts')
     <script src="https://cdn.vidstack.io/player" type="module"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const player = document.querySelector('media-player');
+        const animeId = {{ $anime->id }}; // Video ID passed from Laravel Blade
+
+        const userToken = localStorage.getItem('user_token'); // Ensure the token is stored in localStorage
+        const csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
+
+        // Function to load saved progress
+        const loadSavedProgress = async () => {
+            try {
+                const response = await axios.get(`/get-progress/${animeId}`, {
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                const savedProgress = parseFloat(response.data.current_time || 0);
+                console.log(`Loaded progress: ${savedProgress}`);
+
+                // Set progress when media is ready
+                const applySavedProgress = () => {
+                    console.log('Media loaded. Applying saved progress...');
+                    player.currentTime = savedProgress; // Set progress
+                    console.log(`Player time set to: ${player.currentTime}`);
+                };
+
+                if (player.readyState >= 1) {
+                    // Media is already ready
+                    applySavedProgress();
+                } else {
+                    // Wait for media to load
+                    player.addEventListener('media-loaded', applySavedProgress, { once: true });
+                }
+            } catch (error) {
+                console.error('Error loading progress:', error.response?.data || error.message);
+            }
+        };
+
+        // Call load progress on page load
+        loadSavedProgress();
+
+        // Function to save progress
+        const saveProgress = async (currentTime) => {
+            try {
+                await axios.post(
+                    'http://localhost:8000/save-progress',
+                    {
+                        animes_id: animeId, // Anime ID
+                        current_time: currentTime, // Current playback time
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${userToken}`, // Add the user's token here
+                        },
+                    }
+                );
+                console.log('Progress saved successfully:', currentTime);
+            } catch (error) {
+                console.error('Error saving progress:', error.response?.data || error.message);
+            }
+        };
+
+        // Save progress every 5 seconds
+        player.addEventListener('timeupdate', () => {
+            if (Math.floor(player.currentTime) % 5 === 0) {
+                saveProgress(player.currentTime);
+                localStorage.setItem(`video_${animeId}_progress`, player.currentTime); // Save to localStorage
+            }
+        });
+
+        // Save progress on pause
+        player.addEventListener('media-paused', () => {
+            console.log('Video paused, saving progress...');
+            saveProgress(player.currentTime);
+            localStorage.setItem(`video_${animeId}_progress`, player.currentTime); // Save to localStorage
+        });
+
+        // Save progress on page unload (before navigating away)
+        window.addEventListener('beforeunload', () => {
+            console.log('Page unloading, saving progress...');
+            saveProgress(player.currentTime);
+            localStorage.setItem(`video_${animeId}_progress`, player.currentTime); // Save to localStorage
+        });
+
+        // Debug: Log when the media is ready
+        player.addEventListener('media-ready', () => {
+            console.log('Media is ready');
+        });
+    });
+
+    </script>
 @endsection
+
+</x-app-layout>
