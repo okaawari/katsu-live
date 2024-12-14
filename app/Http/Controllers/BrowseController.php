@@ -12,9 +12,9 @@ class BrowseController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        
+        // Fetch filter options
         $studios = Anime::select('studio')
             ->whereNotNull('studio')
             ->distinct()
@@ -26,15 +26,14 @@ class BrowseController extends Controller
             ->orderBy('year', 'desc')
             ->pluck('year');
 
-        $tags = Tag::select('name')->orderBy('name')->pluck('name');
-        // $tags = Tag::all();
+        $tags = Tag::select('name')->orderBy('name')->pluck('name')->toArray();
 
-        $animes = Anime::orderBy('created_at','desc')->paginate(24);
+        $animes = Anime::orderBy('created_at', 'desc')->paginate(24);
 
-        return view('browse', [
-            'animes' => $animes,
-        ],  compact('studios', 'years', 'tags'));
+        // Return view with data
+        return view('browse', compact('animes', 'studios', 'years', 'tags'));
     }
+
 
     /**
      * Show the form for creating a new resource.

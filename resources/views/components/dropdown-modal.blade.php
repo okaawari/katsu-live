@@ -1,11 +1,13 @@
-@props(['label' => 'Options', 'items' => []])
+@props(['label' => 'Options', 'items' => [], 'searchDisabledFor' => null])
 
 <div 
     x-data="{
         open: false,
         selected: null,
         search: '',
-        filteredItems: @js($items),
+        originalItems: @js($items),  // Store the original items
+        filteredItems: @js($items),  // Initialize filteredItems with originalItems
+        searchEnabled: @js($label !== $searchDisabledFor),
         toggle() {
             if (this.open) {
                 return this.close();
@@ -26,14 +28,19 @@
             this.selected = null;
         },
         filterItems() {
+            if (!this.searchEnabled) {
+                // If search is disabled, reset filteredItems to show all items
+                this.filteredItems = this.originalItems;
+                return;
+            }
             const search = this.search.toString().toLowerCase();
-            this.filteredItems = @js($items).filter(item =>
+            this.filteredItems = this.originalItems.filter(item =>
                 item.toString().toLowerCase().includes(search)
             );
         },
         init() {
-            // Ensure all items are shown initially
-            this.filteredItems = @js($items);
+            // Initialize filteredItems with all items (for default display)
+            this.filteredItems = this.originalItems;
         }
     }"
     x-init="init()"
@@ -69,11 +76,10 @@
 
             <!-- Heroicon: chevron-down -->
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
             </svg>
         </div>
     </button>
-
 
     <!-- Panel -->
     <div
@@ -83,7 +89,7 @@
         x-on:click.outside="close($refs.button)"
         :id="$id('dropdown-panel')"
         style="display: none;"
-        class="absolute left-0 mt-2 min-w-full lg:min-w-[160px] w-full max-h-60 overflow-y-auto rounded-lg bg-slate-800 shadow-md
+        class="absolute z-50 left-0 mt-2 min-w-full lg:min-w-[160px] w-full max-h-60 overflow-y-auto rounded-lg bg-slate-800 shadow-md
         [&::-webkit-scrollbar]:w-2
         [&::-webkit-scrollbar-track]:rounded-full
         [&::-webkit-scrollbar-track]:bg-slate-100
@@ -91,18 +97,19 @@
         [&::-webkit-scrollbar-thumb]:bg-slate-300
         dark:[&::-webkit-scrollbar-track]:bg-slate-700
         dark:[&::-webkit-scrollbar-thumb]:bg-slate-500"
-        
     >
         <!-- Search Bar -->
-        <div class="p-2">
-            <input 
-                type="text"
-                x-model="search"
-                x-on:input="filterItems()"
-                placeholder="Search..."
-                class="w-full px-2 py-1 text-sm bg-slate-700 text-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-        </div>
+        <template x-if="searchEnabled">
+            <div class="p-2">
+                <input 
+                    type="text"
+                    x-model="search"
+                    x-on:input="filterItems()"
+                    placeholder="Search..."
+                    class="w-full px-2 py-1 text-sm bg-slate-700 text-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+            </div>
+        </template>
 
         <!-- Items -->
         <div>
@@ -125,3 +132,58 @@
         </div>
     </div>
 </div>
+
+
+
+<div class="hidden lg:flex justify-center my-8 gap-4 text-sm">
+        <div class="relative min-w-full lg:min-w-[160px] w-full">
+            <input type="text" x-model="searchTerm" placeholder="Search..."
+                class="w-full h-full bg-slate-800 text-gray-200 px-2 py-1 border-slate-800 rounded-md border-transparent focus:border-transparent focus:ring-0" />
+        </div>
+        <div class="relative min-w-full lg:min-w-[160px] w-full">
+            <x-dropdown-modal label="Studio" :items="$studios->toArray()" x-model="studio" />
+        </div>
+        <div class="relative min-w-full lg:min-w-[160px] w-full">
+            <x-dropdown-modal label="Year" :items="$years->toArray()" x-model="year" />
+        </div>
+        <div class="relative min-w-full lg:min-w-[160px] w-full">
+            <x-dropdown-modal label="Tags" :items="$tags" x-model="tag" />
+        </div>
+        <div class="relative min-w-full lg:min-w-[160px] w-full">
+            <x-dropdown-modal label="Status" :items="['TV Series', 'OVA', 'ONA', 'Movie']" searchDisabledFor="Status" x-model="status" />
+        </div>
+        <div class="relative min-w-full lg:min-w-[80px] w-[160px]">
+            <button class="bg-slate-600 w-full h-full rounded-md px-4 py-2 text-gray-200" x-on:click="submitSearch">
+                Search
+            </button>
+        </div>
+    </div>
+
+    <!-- Yeah whatever -->
+        <div class="flex lg:hidden w-full justify-between mt-8 gap-4 text-sm relative">
+        <div class="grow">
+            <input type="text" placeholder="Search..." x-model="searchTerm" class="w-full h-full bg-slate-800 text-gray-200 px-2 py-1 border-slate-800 rounded-md border-transparent focus:border-transparent focus:ring-0"/>
+        </div>
+        <div class="flex-none w-[80px]">
+            <button class="bg-slate-600 w-full h-full rounded-md px-4 py-2 text-gray-200">
+            Search
+            </button>
+        </div>
+        </div>
+        <div class="flex lg:hidden w-full justify-center my-4 text-sm">
+        <div class="grid grid-cols-2 grid-rows-2 w-full gap-4">
+            <div class="relative min-w-full lg:min-w-[160px] w-full">
+            <x-dropdown-modal :items="$studios->toArray()" label="Studio"/>
+            </div>
+            <div class="relative min-w-full lg:min-w-[160px] w-full">
+            <x-dropdown-modal :items="$years->toArray()" label="Year"/>
+            </div>
+            <div class="relative min-w-full lg:min-w-[160px] w-full">
+            <x-dropdown-modal :items="$tags" label="Tags"/>
+            </div>
+            <div class="relative min-w-full lg:min-w-[160px] w-full">
+            <x-dropdown-modal :items="['TV Series', 'OVA', 'ONA', 'Movie']" label="Status"/>
+            </div>
+        </div>
+        <p class="text-white"></p>
+        </div>

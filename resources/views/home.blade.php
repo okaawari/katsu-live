@@ -5,8 +5,8 @@
             <div class="max-w-7xl swiper mySwiper1 m-8">
                 <div class="swiper-wrapper">
                     @foreach($random as $anime)
-                    <div href="{{ url('h/'.$anime->link) }}" class="swiper-slide">
-                        <div class="group bg-slate-800 flex rounded-lg overflow-hidden hover:bg-slate-700 h-[212px]">
+                    <div class="swiper-slide cursor-pointer">
+                        <div class="group bg-slate-800 flex rounded-lg overflow-hidden hover:bg-slate-700 h-[212px]" data-href="{{ url('watch/'.$anime->id) }}">
                             <span class="w-1 bg-blue-300 rounded-lg"></span>
                             <div class="basis-2/3 p-4 flex flex-col h-full justify-between">
                                 <div class="flex">
@@ -18,8 +18,8 @@
                                         @endif
                                     </p>
                                 </div>
-                                <div class="flex"> 
-                                    <a href="{{ url('h/'.$anime->id) }}" class="transition duration-700 text-white font-semi-bold line-clamp-1 text-xl hover:text-blue-500">{{ $anime->name }}</a>
+                                <div class="flex">
+                                    <a wire:navigate href="{{ url('watch/'.$anime->id) }}" class="transition duration-700 text-white font-semi-bold line-clamp-1 text-xl hover:text-blue-500">{{ $anime->name }}</a>
                                 </div>
                                 <div class="flex">
                                     <p class="text-gray-400 line-clamp-2 pt-4">{{ $anime->synopsis }}</p>
@@ -30,14 +30,13 @@
                                 <div class="flex gap-x-3">
                                     @if($anime->tags->count() > 0)
                                         @foreach($anime->tags->shuffle()->take(2) as $tag)
-                                            <a href="#" class="transition duration-700 text-blue-300 hover:text-blue-500">{{ $tag->name }}</a>
+                                            <a href="#" class="transition duration-700 text-blue-300 hover:text-blue-500">{{ $tag->name_mn }}</a>
                                         @endforeach
                                     @else
                                         <a href="#" class="transition duration-700 text-blue-300 hover:text-blue-500">{{ $anime->type }}</a>
                                     @endif
                                 </div>
                             </div>
-                            
                             <div class="basis-1/3 flex items-center justify-center transition duration-500 rotate-12 opacity-70 scale-125 group-hover:rotate-0 group-hover:opacity-100 group-hover:scale-100">
                                 <img
                                     class="object-cover h-full w-auto"
@@ -45,7 +44,6 @@
                             </div>
                         </div>
                     </div>
-
                     @endforeach
                 </div>
             </div>
@@ -98,7 +96,7 @@
 
         <div class="continue-reading-section">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="font-bold text-gray-300 text-2xl">Continue Reading</h1>
+                <h1 class="font-bold text-gray-300 text-2xl">Үргэлжлүүлж үзэх</h1>
                 <a href="#" class="flex items-center text-gray-400 hover:text-white transition">
                     More
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ml-1 transition-transform transform hover:translate-x-1">
@@ -115,7 +113,7 @@
                             <img class="object-cover w-full h-full rounded-lg" src="{{ $anime->poster }}" alt="{{ $anime->name }} Poster" />
                         </div>
                         <div class="ml-4 flex-1">
-                            <p class="text-blue-400 text-sm">Manga</p>
+                            <p class="text-blue-400 text-sm">OVA</p>
                             <p class="line-clamp-1 text-white mt-2">{{ $anime->name }}</p>
                             <p class="text-sm text-gray-400 mt-1">Chapter 1 EN - Page 1</p>
                         </div>
@@ -248,47 +246,62 @@
             </div>
         </div>
     </div>
-    @section('styles')
+
+@section('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
         
     </style>
 @endsection
-@section('scripts')
+
+@section('header-scripts')
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script>
-        var swiper1 = new Swiper(".mySwiper1", {
-            loop: true,
-            autoplay: {
-                delay: 5000,
-                pauseOnMouseEnter: true,
-            },
-            navigation: {
-                nextEl: '.custom-next',
-                prevEl: '.custom-prev',
-            },
-            slidesPerView: 3,
-            spaceBetween: 10,
-            centeredSlides: false,
-            pagination: {
-                el: ".swiper-pagination1",
-                clickable: true,
-            },
-            
-            breakpoints: {
-                0: {
-                    slidesPerView: 1, 
+@endsection
+
+@section('scripts')
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const clickableDivs = document.querySelectorAll('[data-href]');
+
+            clickableDivs.forEach(div => {
+                div.addEventListener('click', function() {
+                    // Redirect to the link stored in the data-href attribute
+                    window.location.href = div.getAttribute('data-href');
+                });
+            });
+            var swiper1 = new Swiper(".mySwiper1", {
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    pauseOnMouseEnter: true,
                 },
-                640: {
-                    slidesPerView: 1, 
+                navigation: {
+                    nextEl: '.custom-next',
+                    prevEl: '.custom-prev',
                 },
-                920: {
-                    slidesPerView: 2, 
+                slidesPerView: 3,
+                spaceBetween: 10,
+                centeredSlides: false,
+                pagination: {
+                    el: ".swiper-pagination1",
+                    clickable: true,
                 },
-                1280: {
-                    slidesPerView: 3, 
+                
+                breakpoints: {
+                    0: {
+                        slidesPerView: 1, 
+                    },
+                    640: {
+                        slidesPerView: 1, 
+                    },
+                    920: {
+                        slidesPerView: 2, 
+                    },
+                    1280: {
+                        slidesPerView: 3, 
+                    },
                 },
-            },
+            })
         });
 
         var swiper2 = new Swiper(".mySwiper2", {

@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\BrowseController;
+use App\Http\Controllers\WatchController;
+use App\Livewire\Search;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +25,13 @@ Route::view('dashboard', 'dashboard')
 Route::get('home', [HomeController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('home');
-Route::get('browse', [BrowseController::class, 'index'])->name('browse');
+    
+Route::get('browse', [BrowseController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('browse');
+
+Route::get('watch/{id}', [WatchController::class, 'index'])
+    ->middleware(['auth', 'verified']);
 
 // Route::view('home', 'home')
 //     ->middleware(['auth'])

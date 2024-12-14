@@ -113,3 +113,9 @@ body::-webkit-scrollbar-thumb {
     padding: 0;
     box-sizing: border-box;
 }
+
+
+.dropdown-scroll {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #111827 #1f2937;
+}
