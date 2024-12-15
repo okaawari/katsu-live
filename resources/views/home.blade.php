@@ -106,19 +106,36 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                @foreach($animes->take(4) as $anime)
+            @foreach($watching as $watch)
                 <div class="relative bg-slate-800 rounded-lg border border-slate-800 hover:border-slate-700 hover:shadow-inner transition duration-300 cursor-pointer group">
-                    <div class="flex items-center p-4">
+                    <div class="flex items-center p-4 overflow-hidden">
                         <div class="flex-shrink-0 w-1/4">
-                            <img class="object-cover w-full h-full rounded-lg" src="{{ $anime->poster }}" alt="{{ $anime->name }} Poster" />
+                            <img class="object-cover w-full h-full rounded-lg" src="{{ $watch->anime->poster }}" alt="{{ $watch->anime->name }} Poster" />
                         </div>
                         <div class="ml-4 flex-1">
-                            <p class="text-blue-400 text-sm">OVA</p>
-                            <p class="line-clamp-1 text-white mt-2">{{ $anime->name }}</p>
+                            <p class="text-blue-400 text-sm">{{ $watch->anime->category->name }}</p>
+                            <p class="line-clamp-1 text-white mt-2">{{ $watch->anime->name }}</p>
                             <p class="text-sm text-gray-400 mt-1">Chapter 1 EN - Page 1</p>
+
+                            <!-- Show current time and total duration in minutes -->
+                            @php
+                                $currentTimeFormatted = gmdate("i:s", $watch->current_time); // Convert seconds to mm:ss
+                                $durationFormatted = sprintf("%02d:00", $watch->anime->duration); // Format duration as mm:00
+                            @endphp
+                            <p class="text-sm text-gray-300 mt-2">
+                            {{ $currentTimeFormatted }} / {{ $durationFormatted }}
+                            </p>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0">
+                            <div class="w-full bg-gray-700 h-1 rounded-b-lg">
+                                <div class="h-1 bg-gray-300 rounded-bl-lg"
+                                    style="width: {{ round($watch->current_time / ($watch->anime->duration * 60) * 100, 2) }}%">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
+                    <!-- Progress Bar -->
                     <div class="absolute top-2 right-2 p-1 bg-slate-900 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700">
                         <a href="#" class="text-gray-500 hover:text-white transition duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -127,7 +144,10 @@
                         </a>
                     </div>
                 </div>
-                @endforeach
+            @endforeach
+
+
+
             </div>
         </div>
 

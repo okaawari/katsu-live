@@ -10,4 +10,9 @@ class VideoWatchProgress extends Model
     use HasFactory;
 
     protected $fillable = ['user_id', 'animes_id', 'current_time'];
+
+    public function anime()
+    {
+        return $this->belongsTo(Anime::class, 'animes_id');
+    }
 }

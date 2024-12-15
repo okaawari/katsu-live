@@ -41,7 +41,13 @@
                     </div>
                     <div>
                         <p class="font-thin text-gray-400">Статус</p>
-                        <p>Гарч байгаа</p>
+                        <p>
+                            @if($anime->status == '1')
+                                Гарч байгаа
+                            @else
+                                Гарч дууссан
+                            @endif
+                        </p>
                     </div>
                     <div>
                         <p class="font-thin text-gray-400">Гарсан өдөр</p>

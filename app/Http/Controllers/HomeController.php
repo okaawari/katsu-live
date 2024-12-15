@@ -6,13 +6,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Anime;
 use App\Models\Tag;
+use App\Models\VideoWatchProgress;
+use Auth;
+
 
 class HomeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $animes = Anime::orderBy('created_at', 'desc')->take(10)->get();
         $animes1 = Anime::orderBy('created_at', 'asc')->take(12)->get();
@@ -24,11 +27,18 @@ class HomeController extends Controller
                 ->get();
         });
 
+        $user = $request->user();
+
+        $watching = VideoWatchProgress::where('user_id', $user->id)
+            ->with('anime')
+            ->get();
+
         return view('home', [
             'animes' => $animes,
             'animes1' => $animes1,
             'animes2' => $animes2,
             'random' => $random,
+            'watching' => $watching,
         ]);
     }
 
