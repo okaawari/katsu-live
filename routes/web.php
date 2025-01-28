@@ -1,48 +1,43 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\BrowseController;
-use App\Http\Controllers\WatchController;
-use App\Http\Controllers\VideoProgressController;
-use App\Livewire\Search;
+use App\Http\Controllers\{
+    HomeController,
+    BrowseController,
+    WatchController,
+    VideoProgressController,
+    UserController,
+};
+use Illuminate\Support\Facades\Storage;
+use App\Models\Anime;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
+// Public routes
 Route::view('/', 'welcome');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-Route::get('home', [HomeController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('home');
-    
-Route::get('browse', [BrowseController::class, 'index'])
-    ->middleware(['auth'])
-    ->name('browse');
+// Authenticated routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('dashboard', fn() => view('dashboard'))->name('dashboard');
+    Route::get('home', [HomeController::class, 'index'])->name('home');
+    Route::get('browse', [BrowseController::class, 'index'])->name('browse');
+    Route::get('watch/{id}', [WatchController::class, 'index'])->name('watch');
 
-Route::get('watch/{id}', [WatchController::class, 'index'])
-    ->middleware(['auth', 'verified']);
+    // Profile
+    Route::view('profile', 'profile')->name('profile');
+    Route::get('user', [UserController::class, 'index'])->name('user');
 
-// Route::view('home', 'home')
-//     ->middleware(['auth'])
-//     ->name('home');
+    // Video Progress
+    Route::post('/save-progress', [VideoProgressController::class, 'saveProgress'])->name('save-progress');
+    Route::get('/get-progress/{animeId}', [VideoProgressController::class, 'getProgress'])->name('get-progress');
 
-Route::post('/save-progress', [VideoProgressController::class, 'saveProgress']);
-Route::get('/get-progress/{animeId}', [VideoProgressController::class, 'getProgress']);
+    // Pricing Plan
+    Route::view('pricing', 'pricing')->name('pricing');
+});
 
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
-
+// Auth routes
 require __DIR__.'/auth.php';

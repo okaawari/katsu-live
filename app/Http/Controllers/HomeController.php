@@ -30,7 +30,9 @@ class HomeController extends Controller
         $user = $request->user();
 
         $watching = VideoWatchProgress::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
             ->with('anime')
+            ->take(4)
             ->get();
 
         return view('home', [

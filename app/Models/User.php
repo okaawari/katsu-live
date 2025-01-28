@@ -53,4 +53,19 @@ class User extends Authenticatable implements LaratrustUser
             ? Storage::disk('public')->url('/user/avatar/'.$this->avatar)
             : Storage::disk('public')->url('/user/avatar/user.jpg');
     }
+
+    public function anime()
+    {
+        return $this->hasMany('App\Models\Anime');
+    }
+
+    public function animelist()
+    {
+        return $this->hasMany('App\Models\Animelist');
+    }
+
+    public function animelistCount()
+    {
+        return $this->animelist()->count();
+    }
 }

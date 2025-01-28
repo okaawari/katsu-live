@@ -1,6 +1,7 @@
 <?php
 
 use Livewire\Volt\Component;
+use Illuminate\Support\Facades\Auth;
 
 new class extends Component
 {
@@ -60,8 +61,8 @@ new class extends Component
                                 x-on:profile-updated.window="avatar = $event.detail.avatar">
                                 <img :src="avatar" alt="Avatar" class="w-8 h-8 rounded-full mr-2">
                             </div>
-                            <div x-data="{ name: '{{ auth()->user()->name }}' }" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
 
+                            <div x-data="{ name: '{{ auth()->user()->name }}' }" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
 
                             <div class="ml-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -70,7 +71,6 @@ new class extends Component
                             </div>
                         </button>
                     </x-slot>
-
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile')" wire:navigate>
                             {{ __('Profile') }}

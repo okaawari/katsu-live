@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="flex flex-wrap max-w-[1400px] mx-auto px-4">
-        <div class="relative w-full lg:basis-2/3 py-4">
+        <div class="relative w-full lg:basis-2/3 pt-4">
         <media-player 
             title="{{ $anime->name }}" 
             src="https://fukkatsu.club/storage/video/{{ $anime->stream_720 }}" 
@@ -24,7 +24,7 @@
 
             <media-video-layout thumbnails="https://files.vidstack.io/sprite-fight/thumbnails.vtt"></media-video-layout>
         </media-player>
-            <div class="mb-2">
+            <div class="mt-1 mb-3"> 
                 <h1 class="text-gray-300 text-xl font-semibold">{{ $anime->name }}</h1>
             </div>
             <div class="border-b border-slate-800"></div>
@@ -69,7 +69,7 @@
                     <div class="relative">
                         <a href="#" 
                         class="py-1.5 px-3 text-sm bg-slate-800 text-gray-300 rounded-full leading-loose font-semibold hover:bg-slate-300 hover:text-slate-800 transition duration-400">
-                            {{ $tag->name_mn }}
+                            {{ $tag->name }}
                         </a>
                     </div>
                 @endforeach

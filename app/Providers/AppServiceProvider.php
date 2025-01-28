@@ -12,7 +12,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // under any circumstances that we change the files for the user's component file
     }
 
     /**

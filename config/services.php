@@ -31,4 +31,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'khanbank' => [
+        'username'   => env('KHANBANK_USERNAME'),
+        'password'   => env('KHANBANK_PASSWORD'),
+        'basic_auth' => env('KHANBANK_AUTH_BASIC'),
+        // 'client_id'     => env('KHANBANK_CLIENT_ID'),
+        // 'client_secret' => env('KHANBANK_CLIENT_SECRET'),
+    ],
+    // ...
+
 ];
