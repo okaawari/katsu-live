@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\VideoWatchProgress;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 use App\Http\Requests\StoreVideoProgressRequest;
 
@@ -34,8 +35,8 @@ class VideoProgressController extends Controller
             );
 
             // 2. Also store (cache) in Redis
-            $cacheKey = $this->buildRedisKey($user->id, $request->input('animes_id'));
-            Redis::set($cacheKey, $request->input('current_time'));
+            // $cacheKey = $this->buildRedisKey($user->id, $request->input('animes_id'));
+            // Redis::set($cacheKey, $request->input('current_time'));
 
             return response()->json([
                 'message' => 'Progress saved successfully',
@@ -98,5 +99,37 @@ class VideoProgressController extends Controller
     protected function buildRedisKey(int $userId, int $animeId): string
     {
         return "video_progress:{$userId}:{$animeId}";
+    }
+
+    public function destroy($animeId)
+    {
+        // Check if user is authenticated
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Find the user’s progress
+        $progress = VideoWatchProgress::where('user_id', $user->id)
+            ->where('animes_id', $animeId)
+            ->first();
+
+        if (!$progress) {
+            return response()->json([
+                'message' => 'No progress record found for this anime.',
+            ], 404);
+        }
+
+        // Delete from DB
+        $progress->delete();
+
+        // OPTIONAL: If you are also caching progress in Redis, remove that key
+        $cacheKey = "video_progress:{$user->id}:{$animeId}";
+        Redis::del($cacheKey);
+
+        return response()->json([
+            'message' => 'Progress deleted successfully.',
+        ], 200);
     }
 }

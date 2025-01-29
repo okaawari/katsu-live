@@ -16,7 +16,7 @@ class StoreVideoProgressRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'anime_id'      => 'required|integer',
+            'animes_id'      => 'required|integer',
             'current_time'  => 'required|numeric',
         ];
     }

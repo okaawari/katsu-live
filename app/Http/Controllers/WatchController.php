@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Anime;
 use Illuminate\Support\Facades\Redis;
 use Carbon\Carbon;
+use App\Models\VideoWatchProgress;
 
 class WatchController extends Controller
 {
@@ -20,5 +21,16 @@ class WatchController extends Controller
         $random = Anime::inRandomOrder()->limit(12)->get();
 
         return view('watch', ['anime' => $anime, 'random' => $random]);
+    }
+
+    public function refresh()
+    {
+        $watching = VideoWatchProgress::where('user_id', auth()->id())
+            ->with('anime')
+            ->orderBy('created_at', 'desc')
+            ->take(4)
+            ->get();
+        
+        return response()->json($watching);
     }
 }

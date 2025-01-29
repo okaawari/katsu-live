@@ -26,6 +26,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('home', [HomeController::class, 'index'])->name('home');
     Route::get('browse', [BrowseController::class, 'index'])->name('browse');
     Route::get('watch/{id}', [WatchController::class, 'index'])->name('watch');
+    Route::get('/watching', [WatchController::class, 'refresh'])->name('watching.index');
+
 
     // Profile
     Route::view('profile', 'profile')->name('profile');
@@ -34,6 +36,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Video Progress
     Route::post('/save-progress', [VideoProgressController::class, 'saveProgress'])->name('save-progress');
     Route::get('/get-progress/{animeId}', [VideoProgressController::class, 'getProgress'])->name('get-progress');
+    Route::delete('/watching/{id}', [VideoProgressController::class, 'destroy'])->name('watching.destroy');
+
 
     // Pricing Plan
     Route::view('pricing', 'pricing')->name('pricing');

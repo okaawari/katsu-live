@@ -64,17 +64,39 @@
                 </div>
                 <div class="flex gap-x-3 place-items-center">
                     <!-- Tab Controls -->
-                    <p @click="activeTab = 0" :class="{ 'text-white': activeTab === 0, 'text-gray-400': activeTab !== 0 }" class="cursor-pointer hover:text-white">
+                    <p 
+                        @click="activeTab = 0" 
+                        :class="{ 'text-blue-400': activeTab === 0, 'text-gray-400': activeTab !== 0 }" 
+                        class="cursor-pointer hover:text-white transition-all duration-300"
+                        x-transition:enter="transition-opacity duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                    >
                         Өдөр
                     </p>
-                    <p @click="activeTab = 1" :class="{ 'text-white': activeTab === 1, 'text-gray-400': activeTab !== 1 }" class="cursor-pointer hover:text-white">
+                    <p 
+                        @click="activeTab = 1" 
+                        :class="{ 'text-blue-400': activeTab === 1, 'text-gray-400': activeTab !== 1 }" 
+                        class="cursor-pointer hover:text-white transition-all duration-300"
+                        x-transition:enter="transition-opacity duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                    >
                         7 хоног
                     </p>
-                    <p @click="activeTab = 2" :class="{ 'text-white': activeTab === 2, 'text-gray-400': activeTab !== 2 }" class="cursor-pointer hover:text-white">
+                    <p 
+                        @click="activeTab = 2" 
+                        :class="{ 'text-blue-400': activeTab === 2, 'text-gray-400': activeTab !== 2 }" 
+                        class="cursor-pointer hover:text-white transition-all duration-300"
+                        x-transition:enter="transition-opacity duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                    >
                         Сар
                     </p>
                 </div>
             </div>
+
 
             <!-- Day -->
             <div class="tab-panel" x-show="activeTab === 0" x-show.transition.in.opacity.duration.600="activeTab === 0">
@@ -96,7 +118,7 @@
 
         <div class="continue-reading-section">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="font-bold text-gray-300 text-2xl">Үргэлжлүүлж үзэх</h1>
+                <h1 class="font-bold text-gray-300 text-2xl">Continue Watching</h1>
                 <a href="#" class="flex items-center text-gray-400 hover:text-white transition">
                     More
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ml-1 transition-transform transform hover:translate-x-1">
@@ -107,50 +129,56 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($watching as $watch)
-                <div class="relative bg-slate-800 rounded-lg border border-slate-800 hover:border-slate-700 hover:shadow-inner transition duration-300 cursor-pointer group">
-                    <div class="flex items-center p-4 overflow-hidden">
-                        <div class="flex-shrink-0 w-1/4">
-                            <img class="object-cover w-full h-full rounded-lg" src="{{ $watch->anime->poster }}" alt="{{ $watch->anime->name }} Poster" />
-                        </div>
-                        <div class="ml-4 flex-1">
-                            <p class="text-blue-400 text-sm">{{ $watch->anime->category->name }}</p>
-                            <p class="line-clamp-1 text-white mt-2">{{ $watch->anime->name }}</p>
-                            <p class="text-sm text-gray-400 mt-1">Chapter 1 EN - Page 1</p>
-
-                            <!-- Show current time and total duration in minutes -->
-                            @php
-                                $currentTimeFormatted = gmdate("i:s", $watch->current_time); // Convert seconds to mm:ss
-                                $durationFormatted = sprintf("%02d:00", $watch->anime->duration); // Format duration as mm:00
-                            @endphp
-                            <p class="text-sm text-gray-300 mt-2">
-                            {{ $currentTimeFormatted }} / {{ $durationFormatted }}
-                            </p>
-                        </div>
-                        <div class="absolute bottom-0 left-0 right-0">
-                            <div class="w-full bg-gray-700 h-1 rounded-b-lg">
-                                <div class="h-1 bg-gray-300 rounded-bl-lg"
-                                    style="width: {{ round($watch->current_time / ($watch->anime->duration * 60) * 100, 2) }}%">
+                <div class="watch-card relative bg-slate-800 rounded-lg border border-slate-800 hover:border-slate-700 hover:shadow-inner transition duration-300 cursor-pointer group">
+                    <a href="{{ url('watch', $watch->animes_id) }}" class="group relative block overflow-hidden">
+                        <div class="flex items-center p-4 overflow-hidden">
+                            <div class="flex-shrink-0 w-1/4">
+                                <img class="object-cover w-full h-full rounded-lg" src="{{ $watch->anime->poster }}" alt="{{ $watch->anime->name }} Poster" />
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <p class="text-blue-400 text-sm">{{ $watch->anime->category->name }}</p>
+                                <p class="line-clamp-1 text-white mt-2">{{ $watch->anime->name }}</p>
+                                <p class="text-sm text-gray-400 mt-1">Chapter 1 EN - Page 1</p>
+                                @php
+                                    $currentTimeFormatted = gmdate("i:s", $watch->current_time); // Convert seconds to mm:ss
+                                    $durationFormatted = sprintf("%02d:00", $watch->anime->duration); // Format duration as mm:00
+                                @endphp
+                                <p class="text-sm text-gray-300 mt-2">
+                                {{ $currentTimeFormatted }} / {{ $durationFormatted }}
+                                </p>
+                            </div>
+                            <div class="absolute bottom-0 left-0 right-0">
+                                <div class="w-full bg-gray-700 h-1 rounded-b-lg">
+                                    <div class="h-1 bg-gray-300 rounded-bl-lg"
+                                        style="width: {{ round($watch->current_time / ($watch->anime->duration * 60) * 100, 2) }}%">
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Progress Bar -->
+                    </a>
                     <div class="absolute top-2 right-2 p-1 bg-slate-900 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                        <a href="#" class="text-gray-500 hover:text-white transition duration-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </a>
+                        <form action="{{ route('watching.destroy', $watch->animes_id) }}" method="POST" class="inline watch-delete-form">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-gray-500 hover:text-white transition duration-300 p-0 bg-transparent border-none rounded-full w-6 h-6 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    class="w-5 h-5" >
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
             @endforeach
-
-
-
             </div>
         </div>
 
+        <!-- Toast Container -->
+        <div id="toast-container" class="fixed bottom-5 left-5 flex flex-col space-y-2 z-50"></div>
 
         <!-- Recently Updated -->
 
@@ -183,7 +211,7 @@
                             alt="{{ $anime->name }} poster" 
                             loading="lazy"/>
                         
-                            <div class="absolute top-16 left-24 opacity-0 group-hover:opacity-100 transition-opacity delay-500 duration-300 rounded-lg z-50 bg-slate-700 p-4 text-gray-300">
+                            <!-- <div class="absolute top-16 left-24 opacity-0 group-hover:opacity-100 transition-opacity delay-500 duration-300 rounded-lg z-50 bg-slate-700 p-4 text-gray-300">
                                 <div>
                                     <a href="#" class="text-sm text-blue-400 hover:text-blue-100">Releasing</a>
                                 </div>
@@ -196,7 +224,7 @@
                                     <a href="#" class="rounded-xl bg-slate-800 py-1 px-2 hover:bg-slate-900 hover:text-white">Drama</a>
                                     <a href="#" class="rounded-xl bg-slate-800 py-1 px-2 hover:bg-slate-900 hover:text-white">Romance</a>
                                 </div>
-                            </div>
+                            </div> -->
 
                     </div>
 
@@ -275,101 +303,221 @@
 @endsection
 
 @section('header-scripts')
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
 @endsection
 
 @section('scripts')
 <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const clickableDivs = document.querySelectorAll('[data-href]');
+    document.addEventListener('DOMContentLoaded', function() {
+        const clickableDivs = document.querySelectorAll('[data-href]');
 
-            clickableDivs.forEach(div => {
-                div.addEventListener('click', function() {
-                    // Redirect to the link stored in the data-href attribute
-                    window.location.href = div.getAttribute('data-href');
-                });
+        clickableDivs.forEach(div => {
+            div.addEventListener('click', function() {
+                // Redirect to the link stored in the data-href attribute
+                window.location.href = div.getAttribute('data-href');
             });
-            var swiper1 = new Swiper(".mySwiper1", {
-                loop: true,
-                autoplay: {
-                    delay: 5000,
-                    pauseOnMouseEnter: true,
-                },
-                navigation: {
-                    nextEl: '.custom-next',
-                    prevEl: '.custom-prev',
-                },
-                slidesPerView: 3,
-                spaceBetween: 10,
-                centeredSlides: false,
-                pagination: {
-                    el: ".swiper-pagination1",
-                    clickable: true,
-                },
-                
-                breakpoints: {
-                    0: {
-                        slidesPerView: 1, 
-                    },
-                    640: {
-                        slidesPerView: 1, 
-                    },
-                    920: {
-                        slidesPerView: 2, 
-                    },
-                    1280: {
-                        slidesPerView: 3, 
-                    },
-                },
-            })
         });
-
-        var swiper2 = new Swiper(".mySwiper2", {
-            // navigation: {
-            //     nextEl: '.swiper-button-next',
-            //     prevEl: '.swiper-button-prev',
-            // },
+        var swiper1 = new Swiper(".mySwiper1", {
+            loop: true,
+            autoplay: {
+                delay: 5000,
+                pauseOnMouseEnter: true,
+            },
+            navigation: {
+                nextEl: '.custom-next',
+                prevEl: '.custom-prev',
+            },
+            slidesPerView: 3,
             spaceBetween: 10,
+            centeredSlides: false,
             pagination: {
-                el: ".swiper-pagination2",
+                el: ".swiper-pagination1",
                 clickable: true,
             },
+            
             breakpoints: {
                 0: {
-                    slidesPerView: 3, 
-                },
-                460: {
-                    slidesPerView: 4, 
+                    slidesPerView: 1, 
                 },
                 640: {
-                    slidesPerView: 5, 
+                    slidesPerView: 1, 
                 },
                 920: {
-                    slidesPerView: 6, 
+                    slidesPerView: 2, 
                 },
                 1280: {
-                    slidesPerView: 7, 
+                    slidesPerView: 3, 
                 },
             },
-            scrollbar: {
-                el: '.swiper-scrollbar',
-                draggable: true,
+        })
+    });
+
+    var swiper2 = new Swiper(".mySwiper2", {
+        // navigation: {
+        //     nextEl: '.swiper-button-next',
+        //     prevEl: '.swiper-button-prev',
+        // },
+        spaceBetween: 10,
+        pagination: {
+            el: ".swiper-pagination2",
+            clickable: true,
+        },
+        breakpoints: {
+            0: {
+                slidesPerView: 3, 
             },
+            460: {
+                slidesPerView: 4, 
+            },
+            640: {
+                slidesPerView: 5, 
+            },
+            920: {
+                slidesPerView: 6, 
+            },
+            1280: {
+                slidesPerView: 7, 
+            },
+        },
+        scrollbar: {
+            el: '.swiper-scrollbar',
+            draggable: true,
+        },
+    });
+
+    var swiper3 = new Swiper(".mySwiper3", {
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        slidesPerView: 6,
+        spaceBetween: 10,
+        pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+        },
+    });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const deleteForms = document.querySelectorAll('.watch-delete-form');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const toastContainer = document.getElementById('toast-container');
+
+    deleteForms.forEach((form) => {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Stop page refresh
+
+            try {
+                // Collect the form data (_method & _token)
+                const formData = new FormData(form);
+
+                // Send the AJAX DELETE request
+                const response = await fetch(form.action, {
+                    method: 'POST', // We use POST + _method=DELETE
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Remove the deleted item from DOM
+                const card = form.closest('.watch-card');
+                if (card) {
+                    card.remove();
+                }
+
+                // Show a toast notification
+                showToast('Anime deleted from history!', toastContainer);
+
+                // ✅ Fetch and update the next item
+                await refreshWatchingList();
+
+            } catch (error) {
+                console.error('Error deleting progress:', error);
+                showToast('An error occurred while trying to delete.', toastContainer, true);
+            }
+        });
+    });
+});
+
+// Fetches and updates the watching list
+async function refreshWatchingList() {
+    try {
+        const response = await fetch('/watching'); // Fetch the updated top 4
+        if (!response.ok) {
+            throw new Error(`Fetch error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const container = document.querySelector('#watching-container');
+        if (!container) return; // Safety check
+
+        container.innerHTML = ''; // Clear existing content
+
+        // Rebuild the UI with updated data
+        data.forEach(item => {
+            const cardHTML = buildWatchingCardHTML(item); // Helper function to generate HTML
+            container.insertAdjacentHTML('beforeend', cardHTML);
         });
 
-        var swiper3 = new Swiper(".mySwiper3", {
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            slidesPerView: 6,
-            spaceBetween: 10,
-            pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
-            },
-        });
-    </script>
+    } catch (error) {
+        console.error('Error fetching updated list:', error);
+    }
+}
+
+
+/**
+ * Utility function to show a toast.
+ * @param {string} message - The text content of the toast
+ * @param {HTMLElement} container - The DOM element in which to place the toast
+ * @param {boolean} isError - Whether this is an error toast or not
+ */
+function showToast(message, container, isError = false) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+
+    // Add some utility classes (Tailwind or custom)
+    toast.classList.add(
+        'py-2',
+        'px-3',
+        'rounded',
+        'shadow-md',
+        'text-white',
+        'mb-2',
+        'animate-slideIn'  // We'll define this animation below
+    );
+
+    // Different background for success vs error
+    if (isError) {
+        toast.classList.add('bg-red-400');
+    } else {
+        toast.classList.add('bg-green-400');
+    }
+
+    // Append the toast
+    container.appendChild(toast);
+
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        // Animate out (optional)
+        toast.classList.add('animate-fadeOut');
+        // Remove from DOM after animation
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+}
+
+</script>
+
 @endsection
 </x-app-layout>
     
