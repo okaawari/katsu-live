@@ -148,3 +148,15 @@ body::-webkit-scrollbar-thumb {
 .animate-fadeOut {
     animation: fadeOut 0.3s ease-in forwards;
 }
+
+.delete-form {
+    transition: opacity 0.2s ease-in-out;
+}
+
+[itemprop="image"] {
+    transition: transform 0.3s ease-in-out;
+}
+
+.group:hover [itemprop="image"] {
+    transform: scale(1.02);
+}

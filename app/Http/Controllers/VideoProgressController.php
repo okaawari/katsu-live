@@ -60,19 +60,7 @@ class VideoProgressController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        // 1. Check Redis first
-        $cacheKey = $this->buildRedisKey($user->id, $animeId);
-        $cachedTime = Redis::get($cacheKey);
-
-        if (!is_null($cachedTime)) {
-            \Log::info('Retrieved progress from Redis', [
-                'animes_id'     => $animeId,
-                'user_id'      => $user->id,
-                'current_time' => $cachedTime,
-            ]);
-
-            return response()->json(['current_time' => (float) $cachedTime], 200);
-        }
+        
 
         // 2. Fallback to DB if Redis cache doesn’t exist
         $progress = VideoWatchProgress::where('user_id', $user->id)
@@ -88,7 +76,7 @@ class VideoProgressController extends Controller
         ]);
 
         // 3. Optionally, cache it in Redis for next time
-        Redis::set($cacheKey, $time);
+        
 
         return response()->json(['current_time' => (float) $time], 200);
     }

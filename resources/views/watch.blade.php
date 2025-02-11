@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="flex flex-wrap max-w-[1400px] mx-auto px-4">
         <div class="relative w-full lg:basis-2/3 pt-4">
-        <media-player 
+        <media-player id="myPlayer"
             title="{{ $anime->name }}" 
             src="https://fukkatsu.club/storage/video/{{ $anime->stream_720 }}" 
             playsinline>
@@ -22,7 +22,7 @@
                 ></media-poster>
             </media-provider>
 
-            <media-video-layout thumbnails="https://files.vidstack.io/sprite-fight/thumbnails.vtt"></media-video-layout>
+            <media-video-layout thumbnails="{{ url('images/sprites/' . $anime->id . '.vtt') }}"></media-video-layout>
         </media-player>
             <div class="mt-1 mb-3"> 
                 <h1 class="text-gray-300 text-xl font-semibold">{{ $anime->name }}</h1>
@@ -76,7 +76,7 @@
             </div>
             
             @endif
-            <div class="bg-slate-800 rounded-lg p-3">
+            <div class="bg-slate-800 rounded-lg p-3 mb-4">
                 <p class="text-gray-300">{{ $anime->synopsis}}</p>
             </div>
             
@@ -123,98 +123,100 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.vidstack.io/player" type="module"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const player = document.querySelector('media-player');
-        const animeId = {{ $anime->id }}; // Video ID passed from Laravel Blade
+        document.addEventListener('DOMContentLoaded', () => {
+            const player = document.getElementById('myPlayer');
 
-        const userToken = localStorage.getItem('user_token'); // Ensure the token is stored in localStorage
-        const csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
+            // From your Blade/Laravel variable
+            const animeId = {{ $anime->id }};
+            const userToken = localStorage.getItem('user_token');
+            const csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
 
-        // Function to load saved progress
-        const loadSavedProgress = async () => {
-            try {
+            // 1) Load saved progress from server
+            const loadSavedProgress = async () => {
+                try {
                 const response = await axios.get(`/get-progress/${animeId}`, {
                     headers: {
-                        'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken
                     }
                 });
 
                 const savedProgress = parseFloat(response.data.current_time || 0);
                 console.log(`Loaded progress: ${savedProgress}`);
 
-                // Set progress when media is ready
+                // We only set currentTime once the Vidstack player is ready
                 const applySavedProgress = () => {
-                    console.log('Media loaded. Applying saved progress...');
-                    player.currentTime = savedProgress; // Set progress
+                    console.log('Media is ready. Applying saved progress...');
+                    player.currentTime = savedProgress;
                     console.log(`Player time set to: ${player.currentTime}`);
                 };
 
-                if (player.readyState >= 1) {
-                    // Media is already ready
-                    applySavedProgress();
-                } else {
-                    // Wait for media to load
-                    player.addEventListener('media-loaded', applySavedProgress, { once: true });
-                }
-            } catch (error) {
+                // Listen for the Vidstack "media ready" event once
+                player.addEventListener('vds-media-ready', applySavedProgress, { once: true });
+
+                console.log('player: ', player);
+
+
+                } catch (error) {
                 console.error('Error loading progress:', error.response?.data || error.message);
-            }
-        };
+                }
+            };
 
-        // Call load progress on page load
-        loadSavedProgress();
+            // Call load on page load
+            loadSavedProgress();
 
-        // Function to save progress
-        const saveProgress = async (currentTime) => {
-            try {
+            // 2) Save progress function
+            const saveProgress = async (currentTime) => {
+                try {
                 await axios.post(
                     'http://localhost:8000/save-progress',
                     {
-                        animes_id: animeId, // Anime ID
-                        current_time: currentTime, // Current playback time
+                    animes_id: animeId,
+                    current_time: currentTime
                     },
                     {
-                        headers: {
-                            Authorization: `Bearer ${userToken}`, // Add the user's token here
-                        },
+                    headers: {
+                        Authorization: `Bearer ${userToken}`, // Attach token
+                    },
                     }
                 );
                 console.log('Progress saved successfully:', currentTime);
-            } catch (error) {
+                } catch (error) {
                 console.error('Error saving progress:', error.response?.data || error.message);
-            }
-        };
+                }
+            };
 
-        // Save progress every 5 seconds
-        player.addEventListener('timeupdate', () => {
-            if (Math.floor(player.currentTime) % 5 === 0) {
+            // 3) Listen for Vidstack events to save progress
+            //    - "vds-time-update" = new time each frame as media plays
+            player.addEventListener('vds-time-update', () => {
+                // Save every 5 seconds (when integer time is multiple of 5)
+                if (Math.floor(player.currentTime) % 5 === 0) {
                 saveProgress(player.currentTime);
-                localStorage.setItem(`video_${animeId}_progress`, player.currentTime); // Save to localStorage
-            }
-        });
+                localStorage.setItem(`video_${animeId}_progress`, player.currentTime);
+                }
+            });
 
-        // Save progress on pause
-        player.addEventListener('media-paused', () => {
-            console.log('Video paused, saving progress...');
-            saveProgress(player.currentTime);
-            localStorage.setItem(`video_${animeId}_progress`, player.currentTime); // Save to localStorage
-        });
+            //    - "vds-pause" = media has been paused
+            player.addEventListener('vds-pause', () => {
+                console.log('Video paused, saving progress...');
+                saveProgress(player.currentTime);
+                localStorage.setItem(`video_${animeId}_progress`, player.currentTime);
+            });
 
-        // Save progress on page unload (before navigating away)
-        window.addEventListener('beforeunload', () => {
-            console.log('Page unloading, saving progress...');
-            saveProgress(player.currentTime);
-            localStorage.setItem(`video_${animeId}_progress`, player.currentTime); // Save to localStorage
-        });
+            // 4) Save progress on page unload
+            window.addEventListener('beforeunload', () => {
+                console.log('Page unloading, saving progress...');
+                saveProgress(player.currentTime);
+                localStorage.setItem(`video_${animeId}_progress`, player.currentTime);
+            });
 
-        // Debug: Log when the media is ready
-        player.addEventListener('media-ready', () => {
-            console.log('Media is ready');
+            // Optional: debug event to confirm media is ready
+            player.addEventListener('vds-media-ready', () => {
+                console.log('vds-media-ready event fired (debug)');
+            });
         });
-    });
-
     </script>
 @endsection
 

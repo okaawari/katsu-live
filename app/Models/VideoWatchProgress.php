@@ -15,4 +15,16 @@ class VideoWatchProgress extends Model
     {
         return $this->belongsTo(Anime::class, 'animes_id');
     }
+
+    public function progressPercentage(): float
+    {
+        // Add null safety checks
+        if (!$this->anime || !$this->anime->duration) {
+            return 0.0;
+        }
+
+        $totalSeconds = $this->anime->duration * 60;
+        return round(($this->current_time / $totalSeconds) * 100, 2);
+    }
+
 }
