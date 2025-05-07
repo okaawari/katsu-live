@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\UserSession;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\Auth;
 
@@ -7,6 +8,15 @@ new class extends Component
 {
     public function logout(): void
     {
+        // Update the current session to mark it as logged out
+        $user = auth()->user();
+        UserSession::where('user_id', $user->id)
+                  ->where('is_current', true)
+                  ->update([
+                      'logout_at' => now(),
+                      'is_current' => false,
+                  ]);
+        
         auth()->guard('web')->logout();
 
         session()->invalidate();

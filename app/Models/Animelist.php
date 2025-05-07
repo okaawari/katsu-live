@@ -11,7 +11,7 @@ class Animelist extends Model
     {
         return $this->belongsTo('App\Models\Anime');
     }
-
+    
     public function user()
     {
         return $this->belongsTo('App\Models\User');

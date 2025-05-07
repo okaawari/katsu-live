@@ -68,4 +68,12 @@ class User extends Authenticatable implements LaratrustUser
     {
         return $this->animelist()->count();
     }
+    
+    /**
+     * Get the sessions for the user.
+     */
+    public function sessions()
+    {
+        return $this->hasMany(UserSession::class);
+    }
 }

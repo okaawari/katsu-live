@@ -1,10 +1,12 @@
 <?php
 
+use App\Models\UserSession;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Jenssegers\Agent\Agent;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Rule;
 use Livewire\Volt\Component;
@@ -36,7 +38,50 @@ new #[Layout('layouts.guest')] class extends Component
 
         RateLimiter::clear($this->throttleKey());
 
+        // Check for active sessions before proceeding
+        $user = auth()->user();
+        $activeSessionsCount = UserSession::where('user_id', $user->id)
+            ->where('is_current', false)
+            ->whereNull('logout_at')
+            ->count();
+        
+        // If user already has 5 active sessions, log them out and show an error
+        if ($activeSessionsCount >= 5) {
+            auth()->logout();
+            throw ValidationException::withMessages([
+                'email' => 'You have exceeded the maximum number of active sessions (5). Please log out from another device before logging in again.',
+            ]);
+        }
+
         session()->regenerate();
+        
+        // Record user session
+        // If there was a previous active session for this user, mark it as not current
+        UserSession::where('user_id', $user->id)
+                  ->where('is_current', true)
+                  ->update(['is_current' => false]);
+        
+        // Create a new session
+        $agent = new Agent();
+        $agent->setUserAgent(request()->userAgent());
+        
+        $deviceType = 'Unknown';
+        if ($agent->isDesktop()) {
+            $deviceType = 'Desktop';
+        } elseif ($agent->isTablet()) {
+            $deviceType = 'Tablet';
+        } elseif ($agent->isMobile()) {
+            $deviceType = 'Mobile';
+        }
+        
+        UserSession::create([
+            'user_id' => $user->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'device_type' => $deviceType,
+            'login_at' => now(),
+            'is_current' => true,
+        ]);
 
         $this->redirect(
             session('url.intended', RouteServiceProvider::HOME),
@@ -71,6 +116,13 @@ new #[Layout('layouts.guest')] class extends Component
 <div>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
+    
+    <!-- Session Error -->
+    @if (session('error'))
+        <div class="mb-4 font-medium text-sm text-red-600 dark:text-red-400">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <form wire:submit="login">
         <!-- Email Address -->

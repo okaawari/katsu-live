@@ -13,8 +13,8 @@ return [
     |
     */
 
-    'failed' => 'These credentials do not match our records.',
-    'password' => 'The provided password is incorrect.',
-    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    'failed' => 'Нууц үг эсвэл мэйл хаяг буруу байна.', 
+    'password' => 'Оруулсан нууц үг буруу байна.',
+    'throttle' => 'Олон удаа нэвтрэх оролдлого хийсэн учир :seconds секундын дараа дахин оролдоно уу.',
 
 ];

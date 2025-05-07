@@ -35,6 +35,7 @@ return [
         'username'   => env('KHANBANK_USERNAME'),
         'password'   => env('KHANBANK_PASSWORD'),
         'basic_auth' => env('KHANBANK_AUTH_BASIC'),
+        'x_dtpc'   => env('KHAANBANK_X_DTPC'),
         // 'client_id'     => env('KHANBANK_CLIENT_ID'),
         // 'client_secret' => env('KHANBANK_CLIENT_SECRET'),
     ],

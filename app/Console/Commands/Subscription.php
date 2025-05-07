@@ -155,19 +155,36 @@ class Subscription extends Command
      */
     private function upgradeUser(User $user, int $days, int $amount, string $refId): void
     {
-        // Update subscription dates
-        $user->sub_date = Carbon::now();
-        $user->expire_date = Carbon::now()->addDays($days);
+        $now = Carbon::now();
+
+        // Use role name instead of ID if you're using LaraTrust
+        $roleName = 'subscriber'; // Replace with your actual role name
+
+        $expireDate = $user->expire_date ? Carbon::parse($user->expire_date) : null;
+
+        if ($user->hasRole($roleName) && $expireDate && $expireDate->gt($now)) {
+            // Extend from current expire_date
+            $user->expire_date = $expireDate->addDays($days);
+        } else {
+            // Start new subscription
+            $user->sub_date = $now;
+            $user->expire_date = $now->copy()->addDays($days);
+        }
+
         $user->save();
 
-        // Assign role (example uses numeric ID 4; adjust as needed)
-        $user->syncRoles([4]);
+        // Assign role (only if not already assigned)
+        if (!$user->hasRole($roleName)) {
+            $user->attachRole($roleName);
+        }
 
-        // Create payment history
+        // Log payment
         PaymentHistory::create([
-            'amount' => $amount,
+            'amount'  => $amount,
             'user_id' => $user->id,
             'refId'   => $refId,
         ]);
     }
+
+
 }

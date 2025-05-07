@@ -16,7 +16,7 @@
             <p>Бидэнтэй нэгдээд {{ intval(abs(now()->diffInDays(auth()->user()->created_at))) }} өдөр өнгөрч ээ.</p>
         </div> -->
         <div class="mt-4 grid gap-4">
-            @foreach (auth()->user()->animelist as $list)
+            @foreach (auth()->user()->animelist->take(10) as $list)
                 <div class="flex bg-slate-800 rounded-md p-2">
                     <img class="w-12 object-cover" src="images/poster.jpg"/>
                     <p class="text-sm text-gray-500">{{ $list->created_at->diffForHumans() }}</p>

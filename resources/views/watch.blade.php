@@ -128,6 +128,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const player = document.getElementById('myPlayer');
+            let savedProgress = 0;
 
             // From your Blade/Laravel variable
             const animeId = {{ $anime->id }};
@@ -137,30 +138,39 @@
             // 1) Load saved progress from server
             const loadSavedProgress = async () => {
                 try {
-                const response = await axios.get(`/get-progress/${animeId}`, {
-                    headers: {
-                    'X-CSRF-TOKEN': csrfToken
+                    const response = await axios.get(`/get-progress/${animeId}`, {
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    });
+
+                    savedProgress = parseFloat(response.data.current_time || 0);
+                    console.log(`Loaded progress: ${savedProgress}`);
+
+                    // Wait for the video to be ready before setting the time
+                    if (player.readyState >= 2) {
+                        setVideoTime();
+                    } else {
+                        player.addEventListener('vds-media-ready', setVideoTime, { once: true });
                     }
-                });
-
-                const savedProgress = parseFloat(response.data.current_time || 0);
-                console.log(`Loaded progress: ${savedProgress}`);
-
-                // We only set currentTime once the Vidstack player is ready
-                const applySavedProgress = () => {
-                    console.log('Media is ready. Applying saved progress...');
-                    player.currentTime = savedProgress;
-                    console.log(`Player time set to: ${player.currentTime}`);
-                };
-
-                // Listen for the Vidstack "media ready" event once
-                player.addEventListener('vds-media-ready', applySavedProgress, { once: true });
-
-                console.log('player: ', player);
-
-
                 } catch (error) {
-                console.error('Error loading progress:', error.response?.data || error.message);
+                    console.error('Error loading progress:', error.response?.data || error.message);
+                }
+            };
+
+            // Function to set the video time
+            const setVideoTime = () => {
+                if (savedProgress > 0) {
+                    console.log('Setting video time to:', savedProgress);
+                    player.currentTime = savedProgress;
+                    
+                    // Double-check if the time was set correctly
+                    setTimeout(() => {
+                        if (Math.abs(player.currentTime - savedProgress) > 1) {
+                            console.log('Retrying to set video time...');
+                            player.currentTime = savedProgress;
+                        }
+                    }, 1000);
                 }
             };
 
@@ -170,35 +180,34 @@
             // 2) Save progress function
             const saveProgress = async (currentTime) => {
                 try {
-                await axios.post(
-                    'http://localhost:8000/save-progress',
-                    {
-                    animes_id: animeId,
-                    current_time: currentTime
-                    },
-                    {
-                    headers: {
-                        Authorization: `Bearer ${userToken}`, // Attach token
-                    },
-                    }
-                );
-                console.log('Progress saved successfully:', currentTime);
+                    await axios.post(
+                        '/save-progress',
+                        {
+                            animes_id: animeId,
+                            current_time: currentTime
+                        },
+                        {
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken,
+                                Authorization: `Bearer ${userToken}`,
+                            },
+                        }
+                    );
+                    console.log('Progress saved successfully:', currentTime);
                 } catch (error) {
-                console.error('Error saving progress:', error.response?.data || error.message);
+                    console.error('Error saving progress:', error.response?.data || error.message);
                 }
             };
 
             // 3) Listen for Vidstack events to save progress
-            //    - "vds-time-update" = new time each frame as media plays
             player.addEventListener('vds-time-update', () => {
                 // Save every 5 seconds (when integer time is multiple of 5)
                 if (Math.floor(player.currentTime) % 5 === 0) {
-                saveProgress(player.currentTime);
-                localStorage.setItem(`video_${animeId}_progress`, player.currentTime);
+                    saveProgress(player.currentTime);
+                    localStorage.setItem(`video_${animeId}_progress`, player.currentTime);
                 }
             });
 
-            //    - "vds-pause" = media has been paused
             player.addEventListener('vds-pause', () => {
                 console.log('Video paused, saving progress...');
                 saveProgress(player.currentTime);
@@ -212,9 +221,13 @@
                 localStorage.setItem(`video_${animeId}_progress`, player.currentTime);
             });
 
-            // Optional: debug event to confirm media is ready
+            // Debug events
             player.addEventListener('vds-media-ready', () => {
-                console.log('vds-media-ready event fired (debug)');
+                console.log('Media is ready');
+            });
+
+            player.addEventListener('vds-time-update', () => {
+                console.log('Current time:', player.currentTime);
             });
         });
     </script>
