@@ -73,5 +73,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('pricing', 'pricing')->name('pricing');
 });
 
+// Admin routes
+Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
+    
+    // Anime management
+    Route::resource('anime', App\Http\Controllers\Admin\AnimeController::class);
+    
+    // Episode management
+    Route::resource('episodes', App\Http\Controllers\Admin\EpisodeController::class);
+    Route::post('episodes/upload-progress', [App\Http\Controllers\Admin\EpisodeController::class, 'uploadProgress'])->name('episodes.upload-progress');
+});
+
 // Auth routes
 require __DIR__.'/auth.php';
