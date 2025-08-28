@@ -15,7 +15,6 @@ class VideoProgressController extends Controller
      */
     public function saveProgress(StoreVideoProgressRequest $request)
     {
-        // The request is already validated in the FormRequest
         $user = Auth::user();
 
         if (!$user) {
@@ -23,7 +22,7 @@ class VideoProgressController extends Controller
         }
 
         try {
-            // 1. Update or create in DB
+            // Update or create in database
             $progress = VideoWatchProgress::updateOrCreate(
                 [
                     'user_id'  => $user->id,
@@ -34,16 +33,21 @@ class VideoProgressController extends Controller
                 ]
             );
 
-            // 2. Also store (cache) in Redis
-            // $cacheKey = $this->buildRedisKey($user->id, $request->input('animes_id'));
-            // Redis::set($cacheKey, $request->input('current_time'));
+            // Cache in Redis for faster access
+            $cacheKey = $this->buildRedisKey($user->id, $request->input('animes_id'));
+            Redis::setex($cacheKey, 3600, $request->input('current_time')); // Cache for 1 hour
 
             return response()->json([
                 'message' => 'Progress saved successfully',
                 'data'    => $progress,
             ], 200);
+
         } catch (\Exception $e) {
-            \Log::error('Error saving video progress', ['error' => $e->getMessage()]);
+            \Log::error('Error saving video progress', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'anime_id' => $request->input('animes_id')
+            ]);
 
             return response()->json(['message' => 'Internal Server Error'], 500);
         }
@@ -60,25 +64,115 @@ class VideoProgressController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        
+        try {
+            // Try to get from Redis cache first
+            $cacheKey = $this->buildRedisKey($user->id, $animeId);
+            $cachedTime = Redis::get($cacheKey);
 
-        // 2. Fallback to DB if Redis cache doesn’t exist
-        $progress = VideoWatchProgress::where('user_id', $user->id)
-            ->where('animes_id', $animeId)
-            ->first();
+            if ($cachedTime !== null) {
+                return response()->json(['current_time' => (float) $cachedTime], 200);
+            }
 
-        $time = $progress ? $progress->current_time : 0;
+            // Fallback to database
+            $progress = VideoWatchProgress::where('user_id', $user->id)
+                ->where('animes_id', $animeId)
+                ->first();
 
-        \Log::info('Retrieved progress from DB', [
-            'animes_id'     => $animeId,
-            'user_id'      => $user->id,
-            'current_time' => $time,
-        ]);
+            $time = $progress ? $progress->current_time : 0;
 
-        // 3. Optionally, cache it in Redis for next time
-        
+            // Cache the result for next time
+            Redis::setex($cacheKey, 3600, $time);
 
-        return response()->json(['current_time' => (float) $time], 200);
+            \Log::info('Retrieved progress from DB', [
+                'animes_id'     => $animeId,
+                'user_id'      => $user->id,
+                'current_time' => $time,
+            ]);
+
+            return response()->json(['current_time' => (float) $time], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error retrieving video progress', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'anime_id' => $animeId
+            ]);
+
+            return response()->json(['message' => 'Internal Server Error'], 500);
+        }
+    }
+
+    /**
+     * Delete video progress for the authenticated user.
+     */
+    public function destroy($animeId)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        try {
+            // Find and delete from database
+            $progress = VideoWatchProgress::where('user_id', $user->id)
+                ->where('animes_id', $animeId)
+                ->first();
+
+            if (!$progress) {
+                return response()->json([
+                    'message' => 'No progress record found for this anime.',
+                ], 404);
+            }
+
+            $progress->delete();
+
+            // Remove from Redis cache
+            $cacheKey = $this->buildRedisKey($user->id, $animeId);
+            Redis::del($cacheKey);
+
+            return response()->json([
+                'message' => 'Progress deleted successfully.',
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error deleting video progress', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'anime_id' => $animeId
+            ]);
+
+            return response()->json(['message' => 'Internal Server Error'], 500);
+        }
+    }
+
+    /**
+     * Get all progress records for the authenticated user.
+     */
+    public function getAllProgress()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        try {
+            $progress = VideoWatchProgress::where('user_id', $user->id)
+                ->with('anime')
+                ->orderBy('updated_at', 'desc')
+                ->get();
+
+            return response()->json($progress);
+
+        } catch (\Exception $e) {
+            \Log::error('Error retrieving all progress', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id
+            ]);
+
+            return response()->json(['message' => 'Internal Server Error'], 500);
+        }
     }
 
     /**
@@ -87,37 +181,5 @@ class VideoProgressController extends Controller
     protected function buildRedisKey(int $userId, int $animeId): string
     {
         return "video_progress:{$userId}:{$animeId}";
-    }
-
-    public function destroy($animeId)
-    {
-        // Check if user is authenticated
-        $user = Auth::user();
-
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        // Find the user’s progress
-        $progress = VideoWatchProgress::where('user_id', $user->id)
-            ->where('animes_id', $animeId)
-            ->first();
-
-        if (!$progress) {
-            return response()->json([
-                'message' => 'No progress record found for this anime.',
-            ], 404);
-        }
-
-        // Delete from DB
-        $progress->delete();
-
-        // OPTIONAL: If you are also caching progress in Redis, remove that key
-        $cacheKey = "video_progress:{$user->id}:{$animeId}";
-        Redis::del($cacheKey);
-
-        return response()->json([
-            'message' => 'Progress deleted successfully.',
-        ], 200);
     }
 }

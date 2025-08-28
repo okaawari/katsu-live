@@ -10,14 +10,14 @@
                         </div>
                         <div class="overflow-hidden">
                             <img class="object-cover w-full h-full opacity-80 transition duration-500 group-hover:opacity-100 group-hover:scale-105" 
-                                src="{{ $anime->poster }}" 
-                                alt="{{ $anime->name }} poster"
+                                src="{{ $anime->cover_image ?? $anime->poster ?? '/images/poster.jpg' }}" 
+                                alt="{{ $anime->title ?? $anime->name ?? 'Anime' }} poster"
                                 loading="lazy"
-                                aria-label="Anime poster: {{ $anime->name }}" />
+                                aria-label="Anime poster: {{ $anime->title ?? $anime->name ?? 'Anime' }}" />
                         </div>
                         <div class="p-3">
-                            <p class="text-center text-gray-400 text-[15px] truncate transition duration-500 group-hover:text-gray-200" aria-label="Anime name: {{ $anime->name }}">
-                                {{ $anime->name }}
+                            <p class="text-center text-gray-400 text-[15px] truncate transition duration-500 group-hover:text-gray-200" aria-label="Anime name: {{ $anime->title ?? $anime->name ?? 'Anime' }}">
+                                {{ $anime->title ?? $anime->name ?? 'Untitled' }}
                             </p>
                         </div>
                     </div>
