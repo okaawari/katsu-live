@@ -82,8 +82,11 @@ new class extends Component
                         </button>
                     </x-slot>
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
+                        <x-dropdown-link :href="route('profile.show', auth()->user()->id)" wire:navigate>
+                            {{ __('View Profile') }}
+                        </x-dropdown-link>
+                        <x-dropdown-link :href="route('profile.settings')" wire:navigate>
+                            {{ __('Settings') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
@@ -134,8 +137,11 @@ new class extends Component
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
+                <x-responsive-nav-link :href="route('profile.show', auth()->user()->id)" wire:navigate>
+                    {{ __('View Profile') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('profile.settings')" wire:navigate>
+                    {{ __('Settings') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->

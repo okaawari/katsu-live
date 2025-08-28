@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('anime_views', function (Blueprint $table) {
+        Schema::create('payment_histories', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('anime_id');
-            $table->date('date');
-            $table->unsignedBigInteger('views_count')->default(0);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->decimal('amount', 10, 2);
+            $table->string('refId')->unique();
             $table->timestamps();
-        
-            $table->unique(['anime_id', 'date']);
-            $table->foreign('anime_id')->references('id')->on('animes')->onDelete('cascade');
         });
     }
 
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('anime_views');
+        Schema::dropIfExists('payment_histories');
     }
 };

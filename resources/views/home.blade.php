@@ -4,45 +4,41 @@
         <div class="mx-4">
             <div class="max-w-7xl swiper mySwiper1 m-8">
                 <div class="swiper-wrapper">
-                    @foreach($random as $anime)
+                    @foreach($random as $episode)
                         <div class="swiper-slide">
-                            <a href="{{ route('watch', $anime->id) }}" class="group bg-slate-800 flex rounded-lg overflow-hidden hover:bg-slate-700 h-[212px]">
+                            <a href="{{ route('watch', $episode->slug) }}" class="group bg-slate-800 flex rounded-lg overflow-hidden hover:bg-slate-700 h-[212px]">
                                 <span class="w-1 bg-blue-300 rounded-lg"></span>
                                 <div class="basis-2/3 p-4 flex flex-col h-full justify-between">
                                     <div class="flex">
                                         <p class="text-gray-300">
-                                            @if($anime->status == 1)
-                                                Гарч дууссан
-                                            @else
-                                                Гарч байгаа
-                                            @endif
+                                            Episode {{ $episode->episode_number }}
                                         </p>
                                     </div>
                                     <div class="flex">
                                         <p class="transition duration-700 text-white font-semi-bold line-clamp-1 text-xl hover:text-blue-500">
-                                            {{ $anime->name }}
+                                            {{ $episode->anime->title ?? $episode->anime->name ?? 'Untitled' }}
                                         </p>
                                     </div>
                                     <div class="flex">
-                                        <p class="text-gray-400 line-clamp-2 pt-4">{{ $anime->synopsis }}</p>
+                                        <p class="text-gray-400 line-clamp-2 pt-4">{{ $episode->synopsis ?? $episode->anime->description ?? 'No description available' }}</p>
                                     </div>
                                     <div class="flex">
-                                        <p class="text-gray-500 pt-4">Нийт анги - {{ $anime->episode_list }}</p>
+                                        <p class="text-gray-500 pt-4">{{ $episode->formatted_duration ?? 'Unknown duration' }}</p>
                                     </div>
                                     <div class="flex gap-x-3">
-                                        @if($anime->tags->count() > 0)
-                                            @foreach($anime->tags->shuffle()->take(2) as $tag)
-                                                <span class="transition duration-700 text-blue-300 hover:text-blue-500">{{ $tag->name_mn }}</span>
+                                        @if($episode->tags && $episode->tags->count() > 0)
+                                            @foreach($episode->tags->shuffle()->take(2) as $tag)
+                                                <span class="transition duration-700 text-blue-300 hover:text-blue-500">{{ $tag->name_mn ?? 'Tag' }}</span>
                                             @endforeach
                                         @else
-                                            <span class="transition duration-700 text-blue-300 hover:text-blue-500">{{ $anime->type }}</span>
+                                            <span class="transition duration-700 text-blue-300 hover:text-blue-500">{{ $episode->anime->type ?? 'Anime' }}</span>
                                         @endif
                                     </div>
                                 </div>
                                 <div class="basis-1/3 flex items-center justify-center transition duration-500 rotate-12 opacity-70 scale-125 group-hover:rotate-0 group-hover:opacity-100 group-hover:scale-100">
                                     <img class="object-cover h-full w-auto"
-                                        src="{{ $anime->poster }}"
-                                        alt="{{ $anime->name }} poster" />
+                                        src="{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
+                                        alt="{{ $episode->anime->title ?? $episode->anime->name ?? 'Anime' }} Episode {{ $episode->episode_number }} poster" />
                                 </div>
                             </a>
                         </div>
@@ -103,17 +99,17 @@
 
             <!-- Day -->
             <div class="tab-panel" x-show="activeTab === 0" x-show.transition.in.opacity.duration.600="activeTab === 0">
-                <x-card :animes="$animes" />
+                <x-episode-card :episodes="$episodes" />
             </div>
 
             <!-- Week -->
             <div class="tab-panel" x-show="activeTab === 1" x-show.transition.in.opacity.duration.600="activeTab === 1">
-                <x-card :animes="$animes1" />
+                <x-episode-card :episodes="$episodes1" />
             </div>
 
             <!-- Month -->
             <div class="tab-panel" x-show="activeTab === 2" x-show.transition.in.opacity.duration.600="activeTab === 2">
-                <x-card :animes="$animes2" />
+                <x-episode-card :episodes="$episodes2" />
             </div>
         </div>
 
@@ -130,23 +126,23 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                @foreach($watching as $watch)
+            <div id="watching-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                @forelse($watching as $watch)
                 <article 
-                        class="relative bg-slate-800 rounded-lg border border-slate-800 hover:border-slate-700 transition-all duration-300 group shadow-lg hover:shadow-xl"
+                        class="relative bg-slate-800 rounded-lg border border-slate-800 hover:border-slate-700 transition-all duration-300 group shadow-lg hover:shadow-xl watch-card"
                         itemscope
                         itemtype="https://schema.org/MediaObject"
                     >
                         <a href="{{ url('watch', $watch->animes_id) }}"
                             class="block p-4 hover:no-underline focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-800 rounded-lg"
-                            aria-label="Continue watching {{ $watch->anime->name }}">
+                            aria-label="Continue watching {{ $watch->anime->title ?? $watch->anime->name ?? 'Anime' }}">
                             <div class="flex gap-4">
                                 <!-- Image Section -->
                                 <div class="flex-shrink-0 w-1/4 relative">
                                     <img 
                                         class="object-cover w-full aspect-[2/3] rounded-lg"
-                                        src="{{ $watch->anime->poster ?? '/placeholder.jpg' }}"
-                                        alt="{{ $watch->anime->name }} poster"
+                                        src="{{ $watch->anime->cover_image ?? $watch->anime->poster ?? '/images/poster.jpg' }}"
+                                        alt="{{ $watch->anime->title ?? $watch->anime->name ?? 'Anime' }} poster"
                                         width="160"
                                         height="240"
                                         loading="lazy"
@@ -164,12 +160,12 @@
                                         class="text-white font-medium truncate"
                                         itemprop="name"
                                     >
-                                        {{ $watch->anime->name }}
+                                        {{ $watch->anime->title ?? $watch->anime->name ?? 'Unknown Anime' }}
                                     </h3>
                                     
                                     <div class="mt-2 space-y-1">
                                         <p class="text-sm text-gray-400 truncate">
-                                            Анги {{ $watch->anime->current_episode }}
+                                            Анги {{ $watch->anime->current_episode ?? '1' }}
                                         </p>
                                         
                                         <!-- Progress -->
@@ -181,8 +177,8 @@
                                                 <time datetime="{{ gmdate('H:i:s', $watch->current_time) }}">
                                                     {{ gmdate("i:s", $watch->current_time) }}
                                                 </time>
-                                                <time datetime="{{ sprintf('%02d:00:00', $watch->anime->duration) }}">
-                                                    {{ sprintf("%02d:00", $watch->anime->duration) }}
+                                                <time datetime="{{ sprintf('%02d:00:00', $watch->anime->duration ?? 24) }}">
+                                                    {{ sprintf("%02d:00", $watch->anime->duration ?? 24) }}
                                                 </time>
                                             </div>
                                             <div 
@@ -219,7 +215,17 @@
                             </form>
                         </div>
                     </article>
-                @endforeach
+                @empty
+                    <div class="col-span-full text-center py-12">
+                        <div class="text-gray-400 mb-4">
+                            <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-300 mb-2">No watching history</h3>
+                        <p class="text-gray-500">Start watching some anime to see your progress here.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
 
@@ -248,7 +254,7 @@
             </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-                    @foreach($animes2 as $anime)
+                    @foreach($episodes2 as $episode)
                     <article 
                         class="group relative flex bg-slate-800 rounded-xl hover:bg-slate-800/75 transition-colors duration-300 shadow-lg hover:shadow-xl overflow-hidden"
                         itemscope itemtype="https://schema.org/CreativeWork"
@@ -256,8 +262,8 @@
                         <div class="basis-1/3 min-w-[120px] relative">
                             <img 
                                 class="w-full h-full object-cover aspect-[2/3] rounded-l-xl"
-                                src="{{ $anime->poster ?? '/placeholder-poster.jpg' }}"
-                                alt="{{ $anime->name }} cover art"
+                                src="{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
+                                alt="{{ $episode->anime->title ?? $episode->anime->name }} Episode {{ $episode->episode_number }} cover art"
                                 width="200"
                                 height="300"
                                 loading="lazy"
@@ -268,7 +274,7 @@
 
                         <div class="basis-2/3 p-3 sm:p-4 flex flex-col">
                             <a 
-                                href="#" 
+                                href="{{ route('watch', $episode->slug) }}" 
                                 class="inline-block mb-2 transition-opacity hover:opacity-75 focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 itemprop="url"
                             >
@@ -276,69 +282,32 @@
                                     class="font-semibold text-white line-clamp-2 mb-1" 
                                     itemprop="name"
                                 >
-                                    {{ $anime->name }}
+                                    {{ $episode->anime->title ?? $episode->anime->name }}
                                 </h3>
                             </a>
                             
                             <div class="text-xs text-slate-400 mb-2 flex items-center gap-2">
-                                <span class="px-2 py-1 bg-slate-700/50 rounded-full">Manga</span>
+                                <span class="px-2 py-1 bg-slate-700/50 rounded-full">Episode {{ $episode->episode_number }}</span>
                             </div>
 
                             <div class="mt-auto space-y-1">
                                 <a 
-                                    href="#"
+                                    href="{{ route('watch', $episode->slug) }}"
                                     class="flex justify-between items-center p-2 sm:px-3 bg-slate-900/30 hover:bg-slate-900/60 rounded-lg transition-colors duration-200 group/chapter"
                                     itemprop="hasPart"
                                     itemscope
                                     itemtype="https://schema.org/CreativeWork"
                                 >
                                     <span class="text-sm text-slate-300 group-hover/chapter:text-white truncate" itemprop="name">
-                                        Chap 1 - Evolve
+                                        {{ $episode->formatted_duration ?? 'Unknown duration' }}
                                     </span>
                                     <time 
                                         class="text-xs text-slate-500 group-hover/chapter:text-slate-300 ml-2 shrink-0" 
                                         itemprop="datePublished"
                                     >
-                                        1 Hour Ago
+                                        {{ $episode->published_at ? $episode->published_at->diffForHumans() : 'Recently' }}
                                     </time>
                                 </a>
-                                <a 
-                                    href="#"
-                                    class="flex justify-between items-center p-2 sm:px-3 bg-slate-900/30 hover:bg-slate-900/60 rounded-lg transition-colors duration-200 group/chapter"
-                                    itemprop="hasPart"
-                                    itemscope
-                                    itemtype="https://schema.org/CreativeWork"
-                                >
-                                    <span class="text-sm text-slate-300 group-hover/chapter:text-white truncate" itemprop="name">
-                                        Chap 2 - Transition
-                                    </span>
-                                    <time 
-                                        class="text-xs text-slate-500 group-hover/chapter:text-slate-300 ml-2 shrink-0" 
-                                        itemprop="datePublished"
-                                    >
-                                        3 days ago
-                                    </time>
-                                </a>
-                                <a 
-                                    href="#"
-                                    class="flex justify-between items-center p-2 sm:px-3 bg-slate-900/30 hover:bg-slate-900/60 rounded-lg transition-colors duration-200 group/chapter"
-                                    itemprop="hasPart"
-                                    itemscope
-                                    itemtype="https://schema.org/CreativeWork"
-                                >
-                                    <span class="text-sm text-slate-300 group-hover/chapter:text-white truncate" itemprop="name">
-                                        Chap 3 - Devour
-                                    </span>
-                                    <time 
-                                        class="text-xs text-slate-500 group-hover/chapter:text-slate-300 ml-2 shrink-0" 
-                                        itemprop="datePublished"
-                                    >
-                                        Week ago
-                                    </time>
-                                </a>
-                                <!-- <div class="text-center p-2 text-slate-500 text-sm">
-                                    No chapters available
-                                </div> -->
                             </div>
                         </div>
                     </article>
@@ -363,21 +332,21 @@
         <div class="flex pb-8">
             <div class="swiper mySwiper3">
                 <div class="swiper-wrapper">
-                    @foreach($animes2 as $anime)
+                    @foreach($episodes2 as $episode)
                     <div class="swiper-slide">
-                        <div href="#" class="group bg-slate-800 rounded-lg overflow-hidden hover:bg-slate-700">
+                        <a href="{{ route('watch', $episode->slug) }}" class="group bg-slate-800 rounded-lg overflow-hidden hover:bg-slate-700 block">
                             <div class="overflow-hidden">
                                 <img
                                     class="transition rounded-lg opacity-80 ease-in-out duration-500 group-hover:opacity-100 group-hover:scale-105"
-                                    src="{{ $anime->poster }}"
-                                    alt="{{ $anime->name }}"
+                                    src="{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
+                                    alt="{{ $episode->anime->title ?? $episode->anime->name }} Episode {{ $episode->episode_number }}"
                                 />
                             </div>
                             
                             <div>
-                                <p class="text-center text-gray-300 duration-500 truncate p-3 group-hover:text-white">{{ $anime->name }}</p>
+                                <p class="text-center text-gray-300 duration-500 truncate p-3 group-hover:text-white">{{ $episode->anime->title ?? $episode->anime->name }} - Episode {{ $episode->episode_number }}</p>
                             </div>
-                        </div>
+                        </a>
                     </div>
                     @endforeach
                 </div>
@@ -388,6 +357,35 @@
 
 @section('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        .animate-slideIn {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .animate-fadeOut {
+            animation: fadeOut 0.3s ease-in;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
 @endsection
 
 @section('header-scripts')
@@ -395,7 +393,7 @@
 @endsection
 
 @section('scripts')
-
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     var swiper1 = new Swiper(".mySwiper1", {
         loop: true,
@@ -432,10 +430,6 @@
     })
 
     var swiper2 = new Swiper(".mySwiper2", {
-        // navigation: {
-        //     nextEl: '.swiper-button-next',
-        //     prevEl: '.swiper-button-prev',
-        // },
         spaceBetween: 10,
         pagination: {
             el: ".swiper-pagination2",
@@ -474,6 +468,20 @@
         pagination: {
             el: ".swiper-pagination",
             clickable: true,
+        },
+        breakpoints: {
+            0: {
+                slidesPerView: 2,
+            },
+            640: {
+                slidesPerView: 3,
+            },
+            920: {
+                slidesPerView: 4,
+            },
+            1280: {
+                slidesPerView: 6,
+            },
         },
     });
 </script>
@@ -552,6 +560,70 @@ async function refreshWatchingList() {
     }
 }
 
+// Helper function to build watching card HTML
+function buildWatchingCardHTML(item) {
+    const progressPercentage = item.duration > 0 ? Math.min(100, (item.current_time / item.duration) * 100) : 0;
+    const currentTimeFormatted = formatTime(item.current_time);
+    const durationFormatted = formatTime(item.duration || 24 * 60); // Default 24 minutes
+    
+    return `
+        <article class="relative bg-slate-800 rounded-lg border border-slate-800 hover:border-slate-700 transition-all duration-300 group shadow-lg hover:shadow-xl watch-card">
+            <a href="/watch/${item.animes_id}" class="block p-4 hover:no-underline focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-800 rounded-lg">
+                <div class="flex gap-4">
+                    <div class="flex-shrink-0 w-1/4 relative">
+                        <img class="object-cover w-full aspect-[2/3] rounded-lg" 
+                             src="${item.anime?.cover_image || item.anime?.poster || '/images/poster.jpg'}" 
+                             alt="${item.anime?.title || item.anime?.name || 'Anime'} poster" 
+                             loading="lazy">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent rounded-lg"></div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <span class="inline-block text-blue-400 text-sm font-medium mb-1">
+                            ${item.anime?.category?.name || 'Uncategorized'}
+                        </span>
+                        <h3 class="text-white font-medium truncate">
+                            ${item.anime?.title || item.anime?.name || 'Unknown Anime'}
+                        </h3>
+                        <div class="mt-2 space-y-1">
+                            <p class="text-sm text-gray-400 truncate">
+                                Анги ${item.anime?.current_episode || '1'}
+                            </p>
+                            <div class="mt-2">
+                                <div class="text-sm text-gray-300 flex justify-between mb-1">
+                                    <time>${currentTimeFormatted}</time>
+                                    <time>${durationFormatted}</time>
+                                </div>
+                                <div class="w-full bg-gray-700 h-1.5 rounded-full">
+                                    <div class="h-1.5 bg-gray-300 rounded-full transition-all duration-500" 
+                                         style="width: ${progressPercentage}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <div class="absolute top-2 right-2 p-1 bg-slate-900 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                <form action="/watching/${item.animes_id}" method="POST" class="inline watch-delete-form">
+                    <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')}">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="text-gray-500 hover:text-white transition duration-300 p-0 bg-transparent border-none rounded-full w-6 h-6 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </article>
+    `;
+}
+
+// Helper function to format time
+function formatTime(seconds) {
+    if (!seconds) return '00:00';
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
 
 /**
  * Utility function to show a toast.

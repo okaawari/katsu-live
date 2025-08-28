@@ -12,6 +12,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 .custom-next, .custom-prev {
     background-color: #3498db;
     color: white;

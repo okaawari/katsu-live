@@ -1,9 +1,15 @@
 <x-app-layout>
     <div class="flex flex-wrap max-w-[1400px] mx-auto px-4">
         <div class="relative w-full lg:basis-2/3 pt-4">
+        <!-- Vidstack Player -->
         <media-player id="myPlayer"
-            title="{{ $anime->name }}" 
-            src="https://fukkatsu.club/storage/video/{{ $anime->stream_720 }}" 
+            title="{{ $episode->anime->title ?? $episode->anime->name }} - Episode {{ $episode->episode_number }}" 
+            playsinline
+            style="width: 100%; height: 480px;">
+
+            <media-player id="myPlayer"
+            title="{{ $episode->name }}" 
+            src="https://fukkatsu.club/storage/video/{{ $episode->video_720p }}" 
             playsinline>
 
             <media-provider>
@@ -24,75 +30,88 @@
 
             <media-video-layout thumbnails="{{ url('images/sprites/' . $anime->id . '.vtt') }}"></media-video-layout>
         </media-player>
+
+            @if($episode->sprite_vtt && $episode->sprite_image)
+            <media-video-layout thumbnails="{{ $episode->sprite_vtt }}"></media-video-layout>
+            @endif
+        </media-player>
+
+
             <div class="mt-1 mb-3"> 
-                <h1 class="text-gray-300 text-xl font-semibold">{{ $anime->name }}</h1>
+                <h1 class="text-gray-300 text-xl font-semibold">{{ $episode->anime->title ?? $episode->anime->name }} - Episode {{ $episode->episode_number }}</h1>
+                @if($episode->title)
+                <p class="text-gray-400 text-sm mt-1">{{ $episode->title }}</p>
+                @endif
             </div>
             <div class="border-b border-slate-800"></div>
             <div class="flex w-full rounded-lg mt-3">
                 <div class="">
                     <img
                         class="sm:w-[180px] sm:min-w-[180px] sm:h-[270px] min-w-[120px] h-[190px] object-cover rounded-lg opacity-90"
-                        src="{{ $anime->poster }}"/>
+                        src="{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
+                        alt="{{ $episode->anime->title ?? $episode->anime->name }} Episode {{ $episode->episode_number }}"
+                    />
                 </div>
                 <div class="grid justify-between text-gray-300 ml-4">
                     <div>
-                        <p class="font-thin text-gray-400">Студи</p>
-                        <a href="#" class="">{{ $anime->studio }}</a>
+                        <p class="font-thin text-gray-400">Episode</p>
+                        <p class="">{{ $episode->episode_number }}</p>
                     </div>
                     <div>
-                        <p class="font-thin text-gray-400">Статус</p>
-                        <p>
-                            @if($anime->status == '1')
-                                Гарч байгаа
-                            @else
-                                Гарч дууссан
-                            @endif
-                        </p>
+                        <p class="font-thin text-gray-400">Duration</p>
+                        <p>{{ $episode->formatted_duration ?? 'Unknown' }}</p>
                     </div>
                     <div>
-                        <p class="font-thin text-gray-400">Гарсан өдөр</p>
-                        <p>{{ $anime->aired_at }}</p>
+                        <p class="font-thin text-gray-400">Published</p>
+                        <p>{{ $episode->published_at ? $episode->published_at->format('M d, Y') : 'Unknown' }}</p>
                     </div>
                     <div>
-                        <p class="font-thin text-gray-400">Нэр</p>
+                        <p class="font-thin text-gray-400">Anime</p>
                         <div class="block sm:flex overflow-y-hidden">
-                            <h2 class="">{{ $anime->name_second }}</h2>
-                            <h3 class="pl-0 sm:pl-5">{{ $anime->name_japanese }}</h3>
+                            <h2 class="">{{ $episode->anime->title ?? $episode->anime->name }}</h2>
+                            @if($episode->anime->title_english)
+                            <h3 class="pl-0 sm:pl-5">{{ $episode->anime->title_english }}</h3>
+                            @endif
                         </div>
-                        
                     </div>
+                    @if($episode->anime->category)
+                    <div>
+                        <p class="font-thin text-gray-400">Category</p>
+                        <p>{{ $episode->anime->category->name }}</p>
+                    </div>
+                    @endif
                 </div>
             </div>
-            @if ($anime->tags != null)
+            @if ($episode->tags && $episode->tags->count() > 0)
             <div class="flex flex-wrap gap-2 my-4">
-                @foreach($anime->tags as $tag)
+                @foreach($episode->tags as $tag)
                     <div class="relative">
                         <a href="#" 
                         class="py-1.5 px-3 text-sm bg-slate-800 text-gray-300 rounded-full leading-loose font-semibold hover:bg-slate-300 hover:text-slate-800 transition duration-400">
-                            {{ $tag->name }}
+                            {{ $tag->name_mn ?? $tag->name }}
                         </a>
                     </div>
                 @endforeach
             </div>
-            
             @endif
             <div class="bg-slate-800 rounded-lg p-3 mb-4">
-                <p class="text-gray-300">{{ $anime->synopsis}}</p>
+                <p class="text-gray-300">{{ $episode->synopsis ?? $episode->anime->description ?? 'No description available' }}</p>
             </div>
             
         </div>
         <div class="w-full lg:basis-1/3 lg:p-4 sm:p-1">
+            <h3 class="text-gray-300 text-lg font-semibold mb-4">More Episodes</h3>
             @foreach ($random as $rand)
-            <div class="border-b border-white/10 pb-5">
-                <a class="flex w-full h-[110px] rounded-lg scale-100 transition-all duration-300 ease-out cursor-pointer hover:scale-[1.02] ring-0 hover:ring-1 hover:shadow-lg ring-slate-700 bg-slate-800" href="{{ url('watch/'.$rand->id) }}">
+            <div class="border-b border-white/10 pb-5 mb-4">
+                <a class="flex w-full h-[110px] rounded-lg scale-100 transition-all duration-300 ease-out cursor-pointer hover:scale-[1.02] ring-0 hover:ring-1 hover:shadow-lg ring-slate-700 bg-slate-800" href="{{ url('watch/'.$rand->slug) }}">
                     <div class="w-[43%] lg:w-[42%] h-[110px] aspect-video relative rounded-lg z-40 shrink-0 overflow-hidden shadow-[4px_0px_5px_0px_rgba(0,0,0,0.3)] transition-all duration-300 ease-out">
-                        <img alt="episode thumbnail" loading="lazy" width="200" height="200" decoding="async" data-nimg="1" class="w-full h-full object-cover" src="https://image.tmdb.org/t/p/w500/aIgNMI3bAR1yauVFlozRzsRdmxj.jpg" style="color: transparent;">
+                        <img alt="episode thumbnail" loading="lazy" width="200" height="200" decoding="async" data-nimg="1" class="w-full h-full object-cover" src="{{ $rand->poster_image ?? $rand->anime->cover_image ?? $rand->anime->poster ?? '/images/poster.jpg' }}" style="color: transparent;">
                     <div style="width: 0%; height: 2px; background-color: red; position: absolute; bottom: 0px; left: 0px;"></div>
-                    <span class="absolute bottom-2 left-2 font-karla font-semibold text-sm bg-black/70 p-1 rounded text-gray-300">Ан {{ $rand->current_episode}}</span>
+                    <span class="absolute bottom-2 left-2 font-karla font-semibold text-sm bg-black/70 p-1 rounded text-gray-300">Ep {{ $rand->episode_number }}</span>
                     </div>
                     <div class="w-full h-full overflow-x-hidden select-none px-4 py-2 flex flex-col justify-evenly text-gray-300">
-                        <h1 class="font-karla font-bold line-clamp-1">{{ $rand->name }}</h1>
-                        <p class="line-clamp-2 text-xs italic font-outfit font-extralight">{{ $rand->synopsis }}</p>
+                        <h1 class="font-karla font-bold line-clamp-1">{{ $rand->anime->title ?? $rand->anime->name }}</h1>
+                        <p class="line-clamp-2 text-xs italic font-outfit font-extralight">{{ $rand->synopsis ?? $rand->anime->description ?? 'No description' }}</p>
                     <div class="flex">
                         <div class="grid grid-cols-2 place-content-center place-items-center gap-1 capitalize text-sm text-white/50 shrink-0">
                             <div title="Sub Available" class="w-full h-full flex-center">
@@ -119,6 +138,23 @@
             font-size: 16px;
             text-shadow: 1px 1px 2px black;
         }
+        
+        #myPlayer {
+            width: 100% !important;
+            height: 400px !important;
+            min-height: 400px !important;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        #myPlayer video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
+        }
+        
+
     </style>
 @endsection
 
@@ -127,11 +163,21 @@
     <script src="https://cdn.vidstack.io/player" type="module"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, looking for player...');
             const player = document.getElementById('myPlayer');
+            
+            console.log('Player element:', player);
+            
+            if (!player) {
+                console.error('Player element not found!');
+                return;
+            }
+            
             let savedProgress = 0;
 
             // From your Blade/Laravel variable
-            const animeId = {{ $anime->id }};
+            const episodeId = {{ $episode->id }};
+            const animeId = {{ $episode->anime->id }};
             const userToken = localStorage.getItem('user_token');
             const csrfToken = document.head.querySelector('meta[name="csrf-token"]').content;
 
@@ -174,8 +220,12 @@
                 }
             };
 
-            // Call load on page load
-            loadSavedProgress();
+            // Call load on page load (optional - won't break if it fails)
+            try {
+                loadSavedProgress();
+            } catch (error) {
+                console.log('Progress loading failed, continuing without saved progress');
+            }
 
             // 2) Save progress function
             const saveProgress = async (currentTime) => {
@@ -184,6 +234,7 @@
                         '/save-progress',
                         {
                             animes_id: animeId,
+                            episode_id: episodeId,
                             current_time: currentTime
                         },
                         {
@@ -204,21 +255,21 @@
                 // Save every 5 seconds (when integer time is multiple of 5)
                 if (Math.floor(player.currentTime) % 5 === 0) {
                     saveProgress(player.currentTime);
-                    localStorage.setItem(`video_${animeId}_progress`, player.currentTime);
+                    localStorage.setItem(`video_${episodeId}_progress`, player.currentTime);
                 }
             });
 
             player.addEventListener('vds-pause', () => {
                 console.log('Video paused, saving progress...');
                 saveProgress(player.currentTime);
-                localStorage.setItem(`video_${animeId}_progress`, player.currentTime);
+                localStorage.setItem(`video_${episodeId}_progress`, player.currentTime);
             });
 
             // 4) Save progress on page unload
             window.addEventListener('beforeunload', () => {
                 console.log('Page unloading, saving progress...');
                 saveProgress(player.currentTime);
-                localStorage.setItem(`video_${animeId}_progress`, player.currentTime);
+                localStorage.setItem(`video_${episodeId}_progress`, player.currentTime);
             });
 
             // Debug events

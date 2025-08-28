@@ -4,82 +4,153 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\Anime;
+use App\Models\Episode;
 use App\Models\Tag;
+use App\Models\Category;
 
 class BrowseController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a paginated listing of episodes with filtering options.
      */
     public function index(Request $request)
     {
-        // Fetch filter options
-        $studios = Anime::select('studio')
-            ->whereNotNull('studio')
-            ->distinct()
-            ->pluck('studio');
+        try {
+            // Fetch filter options
+            $years = Episode::selectRaw('DISTINCT YEAR(published_at) as year')
+                ->whereNotNull('published_at')
+                ->whereRaw('YEAR(published_at) IS NOT NULL')
+                ->where('status', 'published')
+                ->where('visibility', 'public')
+                ->orderBy('year', 'desc')
+                ->pluck('year');
 
-        $years = Anime::selectRaw('DISTINCT YEAR(aired_at) as year')
-            ->whereNotNull('aired_at')
-            ->whereRaw('YEAR(aired_at) IS NOT NULL')
-            ->orderBy('year', 'desc')
-            ->pluck('year');
+            $tags = Tag::select('name_mn')
+                ->whereNotNull('name_mn')
+                ->where('name_mn', '!=', '')
+                ->whereHas('episodes', function($q) {
+                    $q->where('status', 'published')
+                      ->where('visibility', 'public');
+                })
+                ->distinct()
+                ->orderBy('id', 'asc')
+                ->pluck('name_mn');
 
-        $tags = Tag::select('name')->orderBy('name')->pluck('name')->toArray();
+            $categories = Category::select('id', 'name')
+                ->whereHas('animes.episodes', function($q) {
+                    $q->where('status', 'published')
+                      ->where('visibility', 'public');
+                })
+                ->orderBy('name')
+                ->get();
 
-        $animes = Anime::orderBy('created_at', 'desc')->paginate(24);
+            // Build query with filters
+            $query = Episode::query();
 
-        // Return view with data
-        return view('browse', compact('animes', 'studios', 'years', 'tags'));
+            // Only show published and public episodes
+            $query->where('status', 'published')
+                  ->where('visibility', 'public');
+
+            // Apply filters
+            if ($request->filled('search')) {
+                $search = $request->get('search');
+                $query->where(function($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('title_english', 'like', "%{$search}%")
+                      ->orWhere('title_japanese', 'like', "%{$search}%")
+                      ->orWhere('synopsis', 'like', "%{$search}%")
+                      ->orWhereHas('anime', function($animeQuery) use ($search) {
+                          $animeQuery->where('title', 'like', "%{$search}%")
+                                    ->orWhere('title_english', 'like', "%{$search}%")
+                                    ->orWhere('title_japanese', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            if ($request->filled('year')) {
+                $query->whereYear('published_at', $request->get('year'));
+            }
+
+            if ($request->filled('tags')) {
+                $tags = explode(',', $request->get('tags'));
+                $query->whereHas('tags', function($q) use ($tags) {
+                    $q->whereIn('name_mn', $tags);
+                });
+            }
+
+            if ($request->filled('category')) {
+                $query->whereHas('anime', function($q) {
+                    $q->where('category_id', $request->get('category'));
+                });
+            }
+
+            // Apply sorting
+            $sortBy = $request->get('sort', 'published_at');
+            $sortOrder = $request->get('order', 'desc');
+            
+            $allowedSortFields = ['published_at', 'created_at', 'title', 'episode_number', 'view_count', 'average_rating'];
+            if (!in_array($sortBy, $allowedSortFields)) {
+                $sortBy = 'published_at';
+            }
+
+            $query->orderBy($sortBy, $sortOrder);
+
+            // Paginate results - this must be done on the query builder, not collection
+            $episodes = $query->with(['anime', 'anime.category', 'tags'])
+                ->paginate(24)
+                ->withQueryString();
+
+            return view('browse', compact('episodes', 'years', 'tags', 'categories'));
+
+        } catch (\Exception $e) {
+            \Log::error('Error in BrowseController@index: ' . $e->getMessage());
+            
+            // Create an empty paginator for error case
+            $emptyPaginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                collect(),
+                0,
+                24,
+                1,
+                ['path' => request()->url()]
+            );
+            
+            return view('browse', [
+                'episodes' => $emptyPaginator,
+                'years' => collect(),
+                'tags' => [],
+                'categories' => collect(),
+            ])->with('error', 'Unable to load browse content. Please try again later.');
+        }
     }
 
-
     /**
-     * Show the form for creating a new resource.
+     * Get episode suggestions for search autocomplete.
      */
-    public function create()
+    public function suggestions(Request $request)
     {
-        //
-    }
+        $query = $request->get('q');
+        
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $suggestions = Episode::where('status', 'published')
+            ->where('visibility', 'public')
+            ->where(function($q) use ($query) {
+                $q->where('title', 'like', "%{$query}%")
+                  ->orWhere('title_english', 'like', "%{$query}%")
+                  ->orWhere('title_japanese', 'like', "%{$query}%")
+                  ->orWhereHas('anime', function($animeQuery) use ($query) {
+                      $animeQuery->where('title', 'like', "%{$query}%")
+                                ->orWhere('title_english', 'like', "%{$query}%")
+                                ->orWhere('title_japanese', 'like', "%{$query}%");
+                  });
+            })
+            ->select('id', 'title', 'title_english', 'title_japanese', 'synopsis', 'anime_id')
+            ->with('anime:id,title,title_english,title_japanese')
+            ->limit(10)
+            ->get();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json($suggestions);
     }
 }

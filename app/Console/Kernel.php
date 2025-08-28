@@ -16,11 +16,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('command:access_token')
-            ->cron('1,6,11,16,21,26,31,36,41,46,51,56 * * * *');
-    
-        $schedule->command('command:subscription')
-            ->cron('2,7,12,17,22,27,32,37,42,47,52,57 * * * *');
+        $schedule->command('command:access_v3')
+            ->cron('*/30 * * * *');
+        
+        // $schedule->command('command:subscription')
+        //     ->cron('1,4,6,9,11,14,16,19,21,24,26,29,31,34,36,39,41,44,46,49,51,54,56,59 * * * *');
             
         $schedule->command('command:user_update')
             ->hourly();
