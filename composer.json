@@ -1,7 +1,7 @@
 {
-    "name": "laravel/laravel",
+    "name": "katsu/katsu-v12",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Katsu - Anime Streaming Platform built with Laravel 12.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
