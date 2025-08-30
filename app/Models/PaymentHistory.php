@@ -14,7 +14,7 @@ class PaymentHistory extends Model
     protected $fillable = [
         'transaction_date',
         'amount',
-        'description',
+        'user_id',
         'code',
         'refId',
         'currency',

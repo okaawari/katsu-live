@@ -251,6 +251,14 @@ class User extends Authenticatable implements LaratrustUser
                     ->exists();
     }
 
+    /**
+     * Get the user's payment history.
+     */
+    public function paymentHistories(): HasMany
+    {
+        return $this->hasMany(PaymentHistory::class);
+    }
+
     // Note: hasRole() and hasPermission() methods are already provided by Laratrust
     // No need to override them as they're implemented by the HasRolesAndPermissions trait
 }
