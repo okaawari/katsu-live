@@ -8,6 +8,7 @@ use App\Models\Anime;
 use App\Models\User;
 use App\Models\Token;
 use App\Models\PaymentHistory;
+use App\Models\TransactionHistory;
 use Carbon\Carbon;
 
 class Subscription extends Command
@@ -115,7 +116,7 @@ class Subscription extends Command
 
             // 8. Upgrade user
             $days = $amountToDaysMap[$transaction->amount];
-            $this->upgradeUser($user, $days, $transaction->amount, $refId);
+            $this->upgradeUser($user, $days, $transaction->amount, $refId, $transaction->tranDate, $transaction->time, $transaction->description, $transaction->code, $transaction->currency, $transaction->balance);
         }
 
         return Command::SUCCESS;
@@ -153,7 +154,7 @@ class Subscription extends Command
     /**
      * Update user's subscription info and store a payment record.
      */
-    private function upgradeUser(User $user, int $days, int $amount, string $refId): void
+    private function upgradeUser(User $user, int $days, int $amount, string $refId, string $tranDate, string $time, string $description, string $code, string $currency, string $balance): void
     {
         // Get current time
         $now = Carbon::now();

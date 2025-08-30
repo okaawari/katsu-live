@@ -10,7 +10,7 @@
                         </div>
                         <div class="overflow-hidden">
                             <img class="object-cover w-full h-full opacity-80 transition duration-500 group-hover:opacity-100 group-hover:scale-105" 
-                                src="{{ $anime->cover_image ?? $anime->poster ?? '/images/poster.jpg' }}" 
+                                src="storage/poster/{{ $anime->cover_image ?? $anime->poster ?? '/images/poster.jpg' }}" 
                                 alt="{{ $anime->title ?? $anime->name ?? 'Anime' }} poster"
                                 loading="lazy"
                                 aria-label="Anime poster: {{ $anime->title ?? $anime->name ?? 'Anime' }}" />

@@ -13,7 +13,7 @@ class TransactionController extends Controller
                 "tranDate" => "2025-05-08T00:00:00Z",
                 "time" => "10:29",
                 "amount" => 3000,
-                "description" => "ХААНААС: 340000 БАЯРЖАРГАЛ (100007) ГАНХҮҮ",
+                "description" => "100007",
                 "relatedAccount" => "5073092582",
                 "currency" => "MNT",
                 "code" => "4045",

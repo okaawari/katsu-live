@@ -269,7 +269,7 @@
                         <div class="aspect-[2/3] overflow-hidden rounded-lg">
                             <img 
                                 class="w-full h-full object-cover transition duration-500 group-hover:scale-105"
-                                src="{{ $episode->poster_image ?? $episode->thumbnail_image ?? $episode->anime->cover_image ?? '/images/poster.jpg' }}"
+                                src="storage/poster/{{ $episode->poster_image ?? $episode->thumbnail_image ?? $episode->anime->cover_image ?? '/images/poster.jpg' }}"
                                 alt="Episode {{ $episode->episode_number }} poster"
                                 loading="lazy"
                             />

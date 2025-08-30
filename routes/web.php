@@ -73,5 +73,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('pricing', 'pricing')->name('pricing');
 });
 
+// Admin routes
+Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
+    
+    // Anime management
+    Route::resource('anime', App\Http\Controllers\Admin\AnimeController::class);
+    
+    // Episode management
+    Route::resource('episodes', App\Http\Controllers\Admin\EpisodeController::class);
+    Route::post('episodes/upload-progress', [App\Http\Controllers\Admin\EpisodeController::class, 'uploadProgress'])->name('episodes.upload-progress');
+    
+    // User management
+    Route::resource('users', App\Http\Controllers\Admin\UserController::class);
+    Route::post('users/{user}/subscription', [App\Http\Controllers\Admin\UserController::class, 'updateSubscription'])->name('users.subscription');
+    Route::post('users/{user}/roles', [App\Http\Controllers\Admin\UserController::class, 'updateRoles'])->name('users.roles');
+    Route::post('users/{user}/status', [App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.status');
+});
+
 // Auth routes
 require __DIR__.'/auth.php';

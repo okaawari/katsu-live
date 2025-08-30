@@ -14,7 +14,7 @@
 
             <media-provider>
                 <track
-                    src="{{ url('videos/test.vtt') }}"
+                    src="https://fukkatsu.club/storage/subs/{{ $episode->subtitle_mongolian }}"
                     kind="subtitles"
                     label="Mongolia"
                     srclang="mn-MN"

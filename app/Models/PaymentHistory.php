@@ -9,12 +9,21 @@ class PaymentHistory extends Model
 {
     use HasFactory;
 
-    protected $table = 'payment_history';
+    protected $table = 'transaction_histories';
 
     protected $fillable = [
+        'transaction_date',
         'amount',
-        'user_id',
+        'description',
+        'code',
         'refId',
+        'currency',
+    ];
+
+    protected $casts = [
+        'transaction_date' => 'datetime',
+        'amount' => 'decimal:2',
+        'balance' => 'decimal:2',
     ];
 
     public function user()

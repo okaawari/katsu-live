@@ -37,7 +37,7 @@
                                 </div>
                                 <div class="basis-1/3 flex items-center justify-center transition duration-500 rotate-12 opacity-70 scale-125 group-hover:rotate-0 group-hover:opacity-100 group-hover:scale-100">
                                     <img class="object-cover h-full w-auto"
-                                        src="{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
+                                        src="storage/poster/{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
                                         alt="{{ $episode->anime->title ?? $episode->anime->name ?? 'Anime' }} Episode {{ $episode->episode_number }} poster" />
                                 </div>
                             </a>
@@ -141,7 +141,7 @@
                                 <div class="flex-shrink-0 w-1/4 relative">
                                     <img 
                                         class="object-cover w-full aspect-[2/3] rounded-lg"
-                                        src="{{ $watch->anime->cover_image ?? $watch->anime->poster ?? '/images/poster.jpg' }}"
+                                        src="storage/poster/{{ $watch->anime->cover_image ?? $watch->anime->poster ?? '/images/poster.jpg' }}"
                                         alt="{{ $watch->anime->title ?? $watch->anime->name ?? 'Anime' }} poster"
                                         width="160"
                                         height="240"
@@ -262,7 +262,7 @@
                         <div class="basis-1/3 min-w-[120px] relative">
                             <img 
                                 class="w-full h-full object-cover aspect-[2/3] rounded-l-xl"
-                                src="{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
+                                src="storage/poster/{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
                                 alt="{{ $episode->anime->title ?? $episode->anime->name }} Episode {{ $episode->episode_number }} cover art"
                                 width="200"
                                 height="300"
@@ -338,7 +338,7 @@
                             <div class="overflow-hidden">
                                 <img
                                     class="transition rounded-lg opacity-80 ease-in-out duration-500 group-hover:opacity-100 group-hover:scale-105"
-                                    src="{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
+                                    src="storage/poster/{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
                                     alt="{{ $episode->anime->title ?? $episode->anime->name }} Episode {{ $episode->episode_number }}"
                                 />
                             </div>

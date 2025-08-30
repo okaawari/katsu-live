@@ -102,7 +102,7 @@ class Search extends Component
 
         // Year filter
         if ($this->selectedYear) {
-            $query->whereRaw('YEAR(published_at) = ?', [$this->selectedYear]);
+            $query->whereRaw('YEAR(release_date) = ?', [$this->selectedYear]);
         }
 
         // Tag filter
@@ -140,9 +140,9 @@ class Search extends Component
     public function render()
     {
         // Get years from episodes
-        $years = Episode::selectRaw('DISTINCT YEAR(published_at) as year')
-            ->whereNotNull('published_at')
-            ->whereRaw('YEAR(published_at) IS NOT NULL')
+        $years = Episode::selectRaw('DISTINCT YEAR(release_date) as year')
+            ->whereNotNull('release_date')
+            ->whereRaw('YEAR(release_date) IS NOT NULL')
             ->where('status', 'published')
             ->where('visibility', 'public')
             ->orderBy('year', 'desc')

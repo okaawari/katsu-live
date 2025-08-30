@@ -33,6 +33,7 @@ class ImportTable extends Command
                 'title_japanese'  => $first->name_japanese,
                 'duration'        => $first->duration ?? '24 minutes',
                 'slug'            => Str::slug($secondName ?: $first->name) . '-' . uniqid(),
+                'studio'          => $first->studio,
                 'description'     => $first->synopsis,
                 'status'          => ($first->status == 0) ? 'completed' : 'ongoing',
                 'total_episodes'  => $rows->max('episode_list'),
@@ -55,13 +56,14 @@ class ImportTable extends Command
                 $episode = Episode::create([
                     'anime_id'          => $anime->id,
                     'uploaded_by'       => $row->author_id,
-                    'episode_number'    => $row->current_episode ?? 1,
+                    'episode_number'    => $row->current_episode,
                     'title'             => $row->name,
                     'title_english'     => $row->name_second,
                     'title_japanese'    => $row->name_japanese,
                     'duration'          => $row->duration ?? $anime->duration,
                     'synopsis'          => $row->synopsis,
                     'slug'              => Str::slug($row->name) . '-' . uniqid(),
+                    'release_date'      => $row->aired_at,
                     'poster_image'      => $row->poster,
                     'video_480p'        => $row->stream_480,
                     'video_720p'        => $row->stream_720,
@@ -71,8 +73,8 @@ class ImportTable extends Command
                     'view_count'        => $row->views ?? 0,
                     'visibility'        => 'public',
                     'published_at'      => $row->aired_at ? now() : null,
-                    'created_at'        => $row->created_at ?? now(),
-                    'updated_at'        => $row->updated_at ?? now(),
+                    'created_at'        => $row->created_at,
+                    'updated_at'        => $row->updated_at,
                 ]);
 
                 // Attach old tags to this episode

@@ -2,7 +2,7 @@
         <div class="group bg-slate-900 overflow-hidden transition relative">
             <div class="relative overflow-hidden rounded-lg">
                 <img class="object-cover w-full h-[] opacity-80 transition duration-500 group-hover:opacity-100 group-hover:scale-105" 
-                    src="{{ $anime->poster }}" 
+                    src="storage/poster/{{ $anime->poster }}" 
                     alt="{{ $anime->name }} poster"
                     loading="lazy"
                     aria-label="Anime poster: {{ $anime->name }}" />

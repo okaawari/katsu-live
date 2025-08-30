@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('duration')->nullable(); // Can inherit from anime default or be custom
             $table->longText('synopsis'); // Each episode has its own synopsis
             $table->string('slug');
+            $table->string('release_date')->nullable();
             
             // Episode Media (Each episode has its own visual content)
             $table->string('poster_image'); // Main poster for the episode
