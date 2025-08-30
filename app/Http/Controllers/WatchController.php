@@ -7,7 +7,7 @@ use App\Models\Anime;
 use App\Models\Episode;
 use Illuminate\Support\Facades\Redis;
 use Carbon\Carbon;
-use App\Models\VideoWatchProgress;
+use App\Models\VideoProgress;
 use Illuminate\Support\Facades\Auth;
 
 class WatchController extends Controller
@@ -63,8 +63,8 @@ class WatchController extends Controller
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            $watching = VideoWatchProgress::where('user_id', $user->id)
-                ->with('anime')
+            $watching = VideoProgress::where('user_id', $user->id)
+                ->with(['episode', 'episode.anime'])
                 ->orderBy('created_at', 'desc')
                 ->take(4)
                 ->get();

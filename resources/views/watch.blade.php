@@ -184,7 +184,7 @@
             // 1) Load saved progress from server
             const loadSavedProgress = async () => {
                 try {
-                    const response = await axios.get(`/get-progress/${animeId}`, {
+                    const response = await axios.get(`/get-progress/${episodeId}`, {
                         headers: {
                             'X-CSRF-TOKEN': csrfToken
                         }
@@ -233,9 +233,9 @@
                     await axios.post(
                         '/save-progress',
                         {
-                            animes_id: animeId,
                             episode_id: episodeId,
-                            current_time: currentTime
+                            current_time: currentTime,
+                            duration: player.duration || null
                         },
                         {
                             headers: {
