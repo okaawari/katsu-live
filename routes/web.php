@@ -89,6 +89,11 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::post('users/{user}/subscription', [App\Http\Controllers\Admin\UserController::class, 'updateSubscription'])->name('users.subscription');
     Route::post('users/{user}/roles', [App\Http\Controllers\Admin\UserController::class, 'updateRoles'])->name('users.roles');
     Route::post('users/{user}/status', [App\Http\Controllers\Admin\UserController::class, 'updateStatus'])->name('users.status');
+    
+    // Transaction management
+    Route::get('transactions', [App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transactions.index');
+    Route::get('transactions/export', [App\Http\Controllers\Admin\TransactionController::class, 'export'])->name('transactions.export');
+    Route::get('transactions/api-data', [App\Http\Controllers\Admin\TransactionController::class, 'apiData'])->name('transactions.api-data');
 });
 
 // Auth routes
