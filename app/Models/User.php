@@ -89,9 +89,9 @@ class User extends Authenticatable implements LaratrustUser
     }
 
     // Watch progress and lists
-    public function watchProgress(): HasMany
+    public function videoProgress(): HasMany
     {
-        return $this->hasMany(VideoWatchProgress::class);
+        return $this->hasMany(VideoProgress::class);
     }
 
     public function episodeLists(): HasMany
@@ -177,22 +177,22 @@ class User extends Authenticatable implements LaratrustUser
         }]);
     }
 
-    public function scopeWithWatchProgress($query)
+    public function scopeWithVideoProgress($query)
     {
-        return $query->with(['watchProgress' => function($q) {
-            $q->orderBy('last_position_update', 'desc');
+        return $query->with(['videoProgress' => function($q) {
+            $q->orderBy('updated_at', 'desc');
         }]);
     }
 
     // Methods
     public function getTotalWatchTime()
     {
-        return $this->watchProgress()->sum('current_time');
+        return $this->videoProgress()->sum('current_time');
     }
 
     public function getCompletedEpisodesCount()
     {
-        return $this->watchProgress()->where('is_completed', true)->count();
+        return $this->episodeLists()->where('status', 'completed')->count();
     }
 
     public function getWatchingEpisodesCount()
