@@ -48,7 +48,7 @@
                 <div class="">
                     <img
                         class="sm:w-[180px] sm:min-w-[180px] sm:h-[270px] min-w-[120px] h-[190px] object-cover rounded-lg opacity-90"
-                        src="{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
+                        src="/storage/poster/{{ $episode->poster_image ?? $episode->anime->cover_image ?? $episode->anime->poster ?? '/images/poster.jpg' }}"
                         alt="{{ $episode->anime->title ?? $episode->anime->name }} Episode {{ $episode->episode_number }}"
                     />
                 </div>
@@ -70,7 +70,7 @@
                         <div class="block sm:flex overflow-y-hidden">
                             <h2 class="">{{ $episode->anime->title ?? $episode->anime->name }}</h2>
                             @if($episode->anime->title_english)
-                            <h3 class="pl-0 sm:pl-5">{{ $episode->anime->title_english }}</h3>
+                            <h3 class="pl-0 sm:pl-5">{{ $episode->anime->title_japanese }}</h3>
                             @endif
                         </div>
                     </div>
