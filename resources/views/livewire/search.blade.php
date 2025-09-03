@@ -169,7 +169,6 @@
             </button>
         </div>
     </div>
-
     <!-- Loading State -->
     <div wire:loading>
         <div class="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 lg:gap-6 relative pb-8">

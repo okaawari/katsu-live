@@ -55,3 +55,4 @@ class VideoProgress extends Model
         return $this->getProgressPercentage() >= 90;
     }
 }
+}
