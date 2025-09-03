@@ -21,4 +21,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::post('/save-progress', [VideoProgressController::class, 'saveProgress']);
-Route::get('/get-progress/{videoId}', [VideoProgressController::class, 'getProgress']);
+Route::get('/get-progress/{episodeId}', [VideoProgressController::class, 'getProgress']);

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\Anime;
 use App\Models\Episode;
 use App\Models\Tag;
-use App\Models\VideoWatchProgress;
+use App\Models\VideoProgress;
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
@@ -56,9 +56,9 @@ class HomeController extends Controller
             $watching = collect();
 
             if ($user) {
-                $watching = VideoWatchProgress::where('user_id', $user->id)
+                $watching = VideoProgress::where('user_id', $user->id)
                     ->orderBy('created_at', 'desc')
-                    ->with('anime')
+                    ->with(['episode', 'episode.anime'])
                     ->take(4)
                     ->get();
             }

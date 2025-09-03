@@ -133,16 +133,16 @@
                         itemscope
                         itemtype="https://schema.org/MediaObject"
                     >
-                        <a href="{{ url('watch', $watch->animes_id) }}"
+                        <a href="{{ url('watch', $watch->episode->slug) }}"
                             class="block p-4 hover:no-underline focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-800 rounded-lg"
-                            aria-label="Continue watching {{ $watch->anime->title ?? $watch->anime->name ?? 'Anime' }}">
+                            aria-label="Continue watching {{ $watch->episode->anime->title ?? $watch->episode->anime->name ?? 'Anime' }}">
                             <div class="flex gap-4">
                                 <!-- Image Section -->
                                 <div class="flex-shrink-0 w-1/4 relative">
                                     <img 
                                         class="object-cover w-full aspect-[2/3] rounded-lg"
-                                        src="storage/poster/{{ $watch->anime->cover_image ?? $watch->anime->poster ?? '/images/poster.jpg' }}"
-                                        alt="{{ $watch->anime->title ?? $watch->anime->name ?? 'Anime' }} poster"
+                                        src="/storage/poster/{{ $watch->episode->poster_image ?? '/images/poster.jpg' }}"
+                                        alt="{{ $watch->episode->anime->title ?? $watch->episode->anime->name ?? 'Anime' }} poster"
                                         width="160"
                                         height="240"
                                         loading="lazy"
@@ -154,18 +154,18 @@
                                 <!-- Content Section -->
                                 <div class="flex-1 min-w-0">
                                     <span class="inline-block text-blue-400 text-sm font-medium mb-1">
-                                        {{ $watch->anime->category->name ?? 'Uncategorized' }}
+                                        {{ $watch->episode->anime->category->name ?? 'Uncategorized' }}
                                     </span>
                                     <h3 
                                         class="text-white font-medium truncate"
                                         itemprop="name"
                                     >
-                                        {{ $watch->anime->title ?? $watch->anime->name ?? 'Unknown Anime' }}
+                                        {{ $watch->episode->anime->title ?? $watch->episode->anime->name ?? 'Unknown Anime' }}
                                     </h3>
                                     
                                     <div class="mt-2 space-y-1">
                                         <p class="text-sm text-gray-400 truncate">
-                                            Анги {{ $watch->anime->current_episode ?? '1' }}
+                                            Анги {{ $watch->episode->episode_number ?? '1' }}
                                         </p>
                                         
                                         <!-- Progress -->
@@ -177,8 +177,8 @@
                                                 <time datetime="{{ gmdate('H:i:s', $watch->current_time) }}">
                                                     {{ gmdate("i:s", $watch->current_time) }}
                                                 </time>
-                                                <time datetime="{{ sprintf('%02d:00:00', $watch->anime->duration ?? 24) }}">
-                                                    {{ sprintf("%02d:00", $watch->anime->duration ?? 24) }}
+                                                <time datetime="{{ sprintf('%02d:00:00', $watch->episode->duration ?? 24) }}">
+                                                    {{ sprintf("%02d:00", $watch->episode->duration ?? 24) }}
                                                 </time>
                                             </div>
                                             <div 
@@ -199,7 +199,7 @@
                             </div>
                         </a>
                         <div class="absolute top-2 right-2 p-1 bg-slate-900 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                            <form action="{{ route('watching.destroy', $watch->animes_id) }}" method="POST" class="inline watch-delete-form">
+                            <form action="{{ route('progress.destroy', $watch->episode_id) }}" method="POST" class="inline watch-delete-form">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-gray-500 hover:text-white transition duration-300 p-0 bg-transparent border-none rounded-full w-6 h-6 flex items-center justify-center">
@@ -568,25 +568,25 @@ function buildWatchingCardHTML(item) {
     
     return `
         <article class="relative bg-slate-800 rounded-lg border border-slate-800 hover:border-slate-700 transition-all duration-300 group shadow-lg hover:shadow-xl watch-card">
-            <a href="/watch/${item.animes_id}" class="block p-4 hover:no-underline focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-800 rounded-lg">
+            <a href="/watch/${item.episode?.slug}" class="block p-4 hover:no-underline focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-800 rounded-lg">
                 <div class="flex gap-4">
                     <div class="flex-shrink-0 w-1/4 relative">
                         <img class="object-cover w-full aspect-[2/3] rounded-lg" 
-                             src="${item.anime?.cover_image || item.anime?.poster || '/images/poster.jpg'}" 
-                             alt="${item.anime?.title || item.anime?.name || 'Anime'} poster" 
+                             src="${item.episode?.anime?.cover_image || item.episode?.anime?.poster || '/images/poster.jpg'}" 
+                             alt="${item.episode?.anime?.title || item.episode?.anime?.name || 'Anime'} poster" 
                              loading="lazy">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent rounded-lg"></div>
                     </div>
                     <div class="flex-1 min-w-0">
                         <span class="inline-block text-blue-400 text-sm font-medium mb-1">
-                            ${item.anime?.category?.name || 'Uncategorized'}
+                            ${item.episode?.anime?.category?.name || 'Uncategorized'}
                         </span>
                         <h3 class="text-white font-medium truncate">
-                            ${item.anime?.title || item.anime?.name || 'Unknown Anime'}
+                            ${item.episode?.anime?.title || item.episode?.anime?.name || 'Unknown Anime'}
                         </h3>
                         <div class="mt-2 space-y-1">
                             <p class="text-sm text-gray-400 truncate">
-                                Анги ${item.anime?.current_episode || '1'}
+                                Анги ${item.episode?.episode_number || '1'}
                             </p>
                             <div class="mt-2">
                                 <div class="text-sm text-gray-300 flex justify-between mb-1">
@@ -603,7 +603,7 @@ function buildWatchingCardHTML(item) {
                 </div>
             </a>
             <div class="absolute top-2 right-2 p-1 bg-slate-900 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                <form action="/watching/${item.animes_id}" method="POST" class="inline watch-delete-form">
+                <form action="/progress/${item.episode_id}" method="POST" class="inline watch-delete-form">
                     <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')}">
                     <input type="hidden" name="_method" value="DELETE">
                     <button type="submit" class="text-gray-500 hover:text-white transition duration-300 p-0 bg-transparent border-none rounded-full w-6 h-6 flex items-center justify-center">

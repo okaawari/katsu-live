@@ -170,39 +170,6 @@
         </div>
     </div>
 
-    <!-- Clear Filters Button -->
-    @if($searchTerm || $selectedYear || $selectedTag || $selectedStatus || $selectedStudio)
-    <div class="flex justify-center mb-6">
-        <button wire:click="clearFilters" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors">
-            Clear All Filters
-        </button>
-    </div>
-    @endif
-
-    <!-- Sort Options -->
-    <div class="flex justify-between items-center mb-6">
-        <div class="text-gray-300">
-            Showing {{ $episodes->firstItem() ?? 0 }} - {{ $episodes->lastItem() ?? 0 }} of {{ $episodes->total() }} episodes
-        </div>
-        <div class="flex gap-2">
-            <button wire:click="sortBy('published_at')" class="px-3 py-1 rounded {{ $sortBy === 'published_at' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-gray-300' }} hover:bg-slate-600 transition-colors">
-                Latest
-            </button>
-            <button wire:click="sortBy('title')" class="px-3 py-1 rounded {{ $sortBy === 'title' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-gray-300' }} hover:bg-slate-600 transition-colors">
-                Name
-            </button>
-            <button wire:click="sortBy('episode_number')" class="px-3 py-1 rounded {{ $sortBy === 'episode_number' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-gray-300' }} hover:bg-slate-600 transition-colors">
-                Episode
-            </button>
-            <button wire:click="sortBy('view_count')" class="px-3 py-1 rounded {{ $sortBy === 'view_count' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-gray-300' }} hover:bg-slate-600 transition-colors">
-                Popular
-            </button>
-            <button wire:click="sortBy('average_rating')" class="px-3 py-1 rounded {{ $sortBy === 'average_rating' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-gray-300' }} hover:bg-slate-600 transition-colors">
-                Rating
-            </button>
-        </div>
-    </div>
-
     <!-- Loading State -->
     <div wire:loading>
         <div class="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 lg:gap-6 relative pb-8">

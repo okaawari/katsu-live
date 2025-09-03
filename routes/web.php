@@ -58,9 +58,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Video Progress routes
     Route::post('/save-progress', [VideoProgressController::class, 'saveProgress'])->name('save-progress');
-    Route::get('/get-progress/{animeId}', [VideoProgressController::class, 'getProgress'])->name('get-progress');
+    Route::get('/get-progress/{episodeId}', [VideoProgressController::class, 'getProgress'])->name('get-progress');
     Route::get('/all-progress', [VideoProgressController::class, 'getAllProgress'])->name('all-progress');
-    Route::delete('/watching/{id}', [VideoProgressController::class, 'destroy'])->name('watching.destroy');
+    Route::delete('/progress/{episodeId}', [VideoProgressController::class, 'destroy'])->name('progress.destroy');
 
     // User Session routes
     Route::post('sessions/record-login', [UserSessionController::class, 'recordLogin'])->name('sessions.record-login');

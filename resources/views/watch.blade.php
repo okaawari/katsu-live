@@ -3,18 +3,13 @@
         <div class="relative w-full lg:basis-2/3 pt-4">
         <!-- Vidstack Player -->
         <media-player id="myPlayer"
-            title="{{ $episode->anime->title ?? $episode->anime->name }} - Episode {{ $episode->episode_number }}" 
-            playsinline
-            style="width: 100%; height: 480px;">
-
-            <media-player id="myPlayer"
             title="{{ $episode->name }}" 
             src="https://fukkatsu.club/storage/video/{{ $episode->video_720p }}" 
             playsinline>
 
             <media-provider>
                 <track
-                    src="https://fukkatsu.club/storage/subs/{{ $episode->subtitle_mongolian }}"
+                    src="/storage/subs/{{ $episode->subtitle_mongolian }}"
                     kind="subtitles"
                     label="Mongolia"
                     srclang="mn-MN"
@@ -30,12 +25,6 @@
 
             <media-video-layout thumbnails="{{ url('images/sprites/' . $anime->id . '.vtt') }}"></media-video-layout>
         </media-player>
-
-            @if($episode->sprite_vtt && $episode->sprite_image)
-            <media-video-layout thumbnails="{{ $episode->sprite_vtt }}"></media-video-layout>
-            @endif
-        </media-player>
-
 
             <div class="mt-1 mb-3"> 
                 <h1 class="text-gray-300 text-xl font-semibold">{{ $episode->anime->title ?? $episode->anime->name }} - Episode {{ $episode->episode_number }}</h1>
@@ -184,7 +173,7 @@
             // 1) Load saved progress from server
             const loadSavedProgress = async () => {
                 try {
-                    const response = await axios.get(`/get-progress/${animeId}`, {
+                    const response = await axios.get(`/get-progress/${episodeId}`, {
                         headers: {
                             'X-CSRF-TOKEN': csrfToken
                         }
@@ -233,9 +222,9 @@
                     await axios.post(
                         '/save-progress',
                         {
-                            animes_id: animeId,
                             episode_id: episodeId,
-                            current_time: currentTime
+                            current_time: currentTime,
+                            duration: player.duration || null
                         },
                         {
                             headers: {

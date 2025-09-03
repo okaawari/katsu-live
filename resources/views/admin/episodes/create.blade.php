@@ -25,7 +25,7 @@
                 <div>
                     <label for="anime_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Anime *</label>
                     <select name="anime_id" id="anime_id" required
-                            class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-green-500 focus:border-green-500">
+                        class="mt-1 block w-full rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         <option value="">Select Anime</option>
                         @foreach($anime_list as $anime)
                             <option value="{{ $anime->id }}" {{ old('anime_id', request('anime_id')) == $anime->id ? 'selected' : '' }}>
@@ -283,9 +283,30 @@
         </form>
     </div>
 </div>
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <style>
+        .ts-control .item {
+            background-color: #d1d5db !important; /* Tailwind gray-300 */
+            color: #111827 !important; /* Tailwind gray-900 */
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+@endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 <script>
+new TomSelect("#anime_id",{
+    maxItems: 1, 
+    create: false,
+    sortField: {
+        field: "text",
+        direction: "asc"
+    }
+});
+
 function previewImage(input, previewId, imageId) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
