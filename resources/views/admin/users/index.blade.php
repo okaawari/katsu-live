@@ -92,17 +92,22 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">User</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Subscription</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Roles</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Activity</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse($users as $user)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ $user->id }}
+                                </div>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
@@ -117,7 +122,7 @@
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</div>
                                         <div class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
-                                        <div class="text-xs text-gray-400 dark:text-gray-500">Joined {{ $user->created_at->diffForHumans() }}</div>
+                                        <div class="text-xs text-gray-400 dark:text-gray-500">Joined {{ $user->created_at->format('M j, Y') }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -156,13 +161,6 @@
                                     @else bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 @endif">
                                     {{ ucfirst($user->status) }}
                                 </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                <div class="space-y-1">
-                                    <div>{{ $user->anime_count }} anime</div>
-                                    <div>{{ $user->episodes_count }} episodes</div>
-                                    <div>{{ $user->comments_count }} comments</div>
-                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">

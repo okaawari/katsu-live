@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\PaymentHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -81,19 +83,32 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'subscription_type' => 'nullable|in:free,premium,vip',
             'subscription_expires_at' => 'nullable|date|after:now',
+            'subscription_duration_days' => 'nullable|integer|min:1|max:365',
+            'subscription_duration_months' => 'nullable|integer|min:1|max:12',
 
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,id',
             'status' => 'nullable|in:active,inactive,suspended,banned',
         ]);
 
+        // Calculate subscription expiration date if duration is provided
+        $subscriptionExpiresAt = $validated['subscription_expires_at'];
+        $subscriptionDate = now();
+
+        // Only calculate new expiration date if days or months are provided
+        if ($validated['subscription_duration_days'] ?? false) {
+            $subscriptionExpiresAt = now()->addDays((int) $validated['subscription_duration_days']);
+        } elseif ($validated['subscription_duration_months'] ?? false) {
+            $subscriptionExpiresAt = now()->addMonths((int) $validated['subscription_duration_months']);
+        }
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'subscription_type' => $validated['subscription_type'] ?? 'free',
-            'subscription_expires_at' => $validated['subscription_expires_at'],
-
+            'subscription_date' => $subscriptionDate,
+            'subscription_expires_at' => $subscriptionExpiresAt,
             'status' => $validated['status'] ?? 'active',
         ]);
 
@@ -117,10 +132,11 @@ class UserController extends Controller
             'episodes', 
             'comments', 
             'ratings',
-            'watchProgress',
+            'videoProgress',
             'episodeLists',
             'userBadges.badge',
-            'sessions'
+            'sessions',
+            'paymentHistories'
         ]);
 
         $roles = Role::all();
@@ -147,6 +163,8 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'subscription_type' => 'nullable|in:free,premium,vip',
             'subscription_expires_at' => 'nullable|date',
+            'subscription_duration_days' => 'nullable|integer|min:1|max:365',
+            'subscription_duration_months' => 'nullable|integer|min:1|max:12',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,id',
             'status' => 'nullable|in:active,inactive,suspended,banned',
@@ -157,7 +175,55 @@ class UserController extends Controller
             'birth_date' => 'nullable|date',
         ]);
 
+        // Calculate subscription expiration date if duration is provided
+        $subscriptionExpiresAt = $validated['subscription_expires_at'];
+        $subscriptionDate = $user->subscription_date ?? now();
+
+        // Only calculate new expiration date if days or months are provided
+        $durationAdded = false;
+        if ($validated['subscription_duration_days'] ?? false) {
+            // If subscription_expires_at is not null, add days to it, otherwise add to now
+            $baseDate = $user->subscription_expires_at ? $user->subscription_expires_at : now();
+            $subscriptionExpiresAt = $baseDate->addDays((int) $validated['subscription_duration_days']);
+            $durationAdded = true;
+        } elseif ($validated['subscription_duration_months'] ?? false) {
+            // If subscription_expires_at is not null, add months to it, otherwise add to now
+            $baseDate = $user->subscription_expires_at ? $user->subscription_expires_at : now();
+            $subscriptionExpiresAt = $baseDate->addMonths((int) $validated['subscription_duration_months']);
+            $durationAdded = true;
+        }
+
+        // Update subscription_date if it's null and we're setting an expiration date
+        if (!$user->subscription_date && $subscriptionExpiresAt) {
+            $validated['subscription_date'] = now();
+        }
+
+        // Only update subscription_expires_at if we calculated a new value or if it was explicitly provided
+        if ($subscriptionExpiresAt) {
+            $validated['subscription_expires_at'] = $subscriptionExpiresAt;
+        }
+
         $user->update($validated);
+
+        // Create payment history record if duration was added
+        if ($durationAdded) {
+            $durationValue = null;
+            if ($validated['subscription_duration_days'] ?? false) {
+                $durationValue = $validated['subscription_duration_days'] . ' days';
+            } elseif ($validated['subscription_duration_months'] ?? false) {
+                $durationValue = $validated['subscription_duration_months'] . ' months';
+            }
+
+            PaymentHistory::create([
+                'user_id' => $user->id,
+                'type' => 1,
+                'refId' => Str::uuid(),
+                'transaction_date' => now(),
+                'amount' => 0.00, // Admin extension, no payment amount
+                'code' => 'ADMIN_EXTENSION',
+                'duration' => $durationValue,
+            ]);
+        }
 
         if (isset($validated['roles'])) {
             $user->syncRoles($validated['roles']);
@@ -192,9 +258,59 @@ class UserController extends Controller
         $validated = $request->validate([
             'subscription_type' => 'required|in:free,premium,vip',
             'subscription_expires_at' => 'nullable|date',
+            'subscription_duration_days' => 'nullable|integer|min:1|max:365',
+            'subscription_duration_months' => 'nullable|integer|min:1|max:12',
         ]);
 
+        // Calculate subscription expiration date if duration is provided
+        $subscriptionExpiresAt = $validated['subscription_expires_at'];
+        $subscriptionDate = $user->subscription_date ?? now();
+
+        // Only calculate new expiration date if days or months are provided
+        $durationAdded = false;
+        if ($validated['subscription_duration_days'] ?? false) {
+            // If subscription_expires_at is not null, add days to it, otherwise add to now
+            $baseDate = $user->subscription_expires_at ? $user->subscription_expires_at : now();
+            $subscriptionExpiresAt = $baseDate->addDays((int) $validated['subscription_duration_days']);
+            $durationAdded = true;
+        } elseif ($validated['subscription_duration_months'] ?? false) {
+            // If subscription_expires_at is not null, add months to it, otherwise add to now
+            $baseDate = $user->subscription_expires_at ? $user->subscription_expires_at : now();
+            $subscriptionExpiresAt = $baseDate->addMonths((int) $validated['subscription_duration_months']);
+            $durationAdded = true;
+        }
+
+        // Update subscription_date if it's null and we're setting an expiration date
+        if (!$user->subscription_date && $subscriptionExpiresAt) {
+            $validated['subscription_date'] = now();
+        }
+
+        // Only update subscription_expires_at if we calculated a new value or if it was explicitly provided
+        if ($subscriptionExpiresAt) {
+            $validated['subscription_expires_at'] = $subscriptionExpiresAt;
+        }
+
         $user->update($validated);
+
+        // Create payment history record if duration was added
+        if ($durationAdded) {
+            $durationValue = null;
+            if ($validated['subscription_duration_days'] ?? false) {
+                $durationValue = $validated['subscription_duration_days'] . ' days';
+            } elseif ($validated['subscription_duration_months'] ?? false) {
+                $durationValue = $validated['subscription_duration_months'] . ' months';
+            }
+
+            PaymentHistory::create([
+                'user_id' => $user->id,
+                'type' => 1,
+                'refId' => Str::uuid(),
+                'transaction_date' => now(),
+                'amount' => 0.00, // Admin extension, no payment amount
+                'code' => 'ADMIN_EXTENSION',
+                'duration' => $durationValue,
+            ]);
+        }
 
         return redirect()->route('admin.users.show', $user)
             ->with('success', 'Subscription updated successfully.');

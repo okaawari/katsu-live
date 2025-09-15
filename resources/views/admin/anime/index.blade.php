@@ -93,9 +93,9 @@
                                     <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate">
                                         {{ $item->title }}
                                     </h3>
-                                    @if($item->title_english)
+                                    @if($item->title_japanese)
                                         <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
-                                            {{ $item->title_english }}
+                                            {{ $item->title_japanese }}
                                         </p>
                                     @endif
                                     <p class="text-xs text-gray-400">
@@ -192,7 +192,7 @@
                                 <div class="flex items-center">
                                     <div class="w-12 h-12 flex-shrink-0">
                                         @if($item->cover_image)
-                                            <img class="h-12 w-12 rounded-lg object-cover" src="{{ asset('storage/' . $item->cover_image) }}" alt="{{ $item->title }}">
+                                            <img class="h-12 w-12 rounded-lg object-cover" src="{{ asset('storage/poster/' . $item->cover_image) }}" alt="{{ $item->title }}">
                                         @else
                                             <div class="h-12 w-12 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
                                                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -203,11 +203,11 @@
                                     </div>
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ $item->title }}
+                                            {{ Str::limit($item->title, 40) }}
                                         </div>
-                                        @if($item->title_english)
+                                        @if($item->title_japanese)
                                             <div class="text-sm text-gray-500 dark:text-gray-400">
-                                                {{ $item->title_english }}
+                                                {{ Str::limit($item->title_japanese, 40) }}
                                             </div>
                                         @endif
                                         <div class="text-xs text-gray-400">

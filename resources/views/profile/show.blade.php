@@ -109,23 +109,23 @@
                                     <div class="flex items-start space-x-3">
                                         <img class="w-16 h-20 object-cover rounded" 
                                              src="{{ asset('images/poster.jpg') }}" 
-                                             alt="{{ $progress->anime->name ?? 'Anime' }}">
+                                             alt="{{ $progress->episode->anime->title ?? 'Anime' }}">
                                         <div class="flex-1 min-w-0">
                                             <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                {{ $progress->anime->name ?? 'Unknown Anime' }}
+                                                {{ $progress->episode->anime->title ?? 'Unknown Anime' }}
                                             </h3>
                                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                Episode {{ $progress->episode_number ?? 'N/A' }}
+                                                Episode {{ $progress->episode->episode_number ?? 'N/A' }}
                                             </p>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                                 {{ $progress->updated_at->diffForHumans() }}
                                             </p>
-                                            @if($progress->progress_percentage)
+                                            @if($progress->progressPercentage())
                                                 <div class="mt-2">
                                                     <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1">
-                                                        <div class="bg-blue-600 h-1 rounded-full" style="width: {{ $progress->progress_percentage }}%"></div>
+                                                        <div class="bg-blue-600 h-1 rounded-full" style="width: {{ $progress->progressPercentage() }}%"></div>
                                                     </div>
-                                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ round($progress->progress_percentage) }}%</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ round($progress->progressPercentage()) }}%</span>
                                                 </div>
                                             @endif
                                         </div>

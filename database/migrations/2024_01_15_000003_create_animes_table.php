@@ -30,7 +30,6 @@ return new class extends Migration
             // Series Information
             $table->string('status')->nullable(); // completed, ongoing, upcoming, cancelled
             $table->string('total_episodes');
-            $table->integer('current_episode')->default(0);
             
             // Series Media (Optional - episodes have their own)
             $table->string('cover_image')->nullable();

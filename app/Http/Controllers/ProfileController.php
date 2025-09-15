@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\VideoWatchProgress;
+use App\Models\VideoProgress;
 use App\Models\Anime;
 use App\Models\Comment;
 use App\Models\Rating;
+use App\Models\PaymentHistory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -23,15 +24,15 @@ class ProfileController extends Controller
         
         // Get user's public information
         $stats = [
-            'total_watched' => VideoWatchProgress::where('user_id', $user->id)->count(),
+            'total_watched' => VideoProgress::where('user_id', $user->id)->count(),
             'total_anime' => Anime::where('author_id', $user->id)->count(),
             'total_comments' => Comment::where('user_id', $user->id)->count(),
             'total_ratings' => Rating::where('user_id', $user->id)->count(),
         ];
 
         // Get recent watching history (public)
-        $recentWatching = VideoWatchProgress::where('user_id', $user->id)
-            ->with('anime')
+        $recentWatching = VideoProgress::where('user_id', $user->id)
+            ->with('episode.anime')
             ->orderBy('updated_at', 'desc')
             ->take(6)
             ->get();
@@ -61,7 +62,7 @@ class ProfileController extends Controller
 
         // Get user's detailed statistics
         $stats = [
-            'total_watched' => VideoWatchProgress::where('user_id', $user->id)->count(),
+            'total_watched' => VideoProgress::where('user_id', $user->id)->count(),
             'total_anime' => Anime::where('author_id', $user->id)->count(),
             'total_comments' => Comment::where('user_id', $user->id)->count(),
             'total_ratings' => Rating::where('user_id', $user->id)->count(),
@@ -69,13 +70,19 @@ class ProfileController extends Controller
         ];
 
         // Get recent activity
-        $recentActivity = VideoWatchProgress::where('user_id', $user->id)
-            ->with('anime')
+        $recentActivity = VideoProgress::where('user_id', $user->id)
+            ->with('episode.anime')
             ->orderBy('updated_at', 'desc')
             ->take(10)
             ->get();
 
-        return view('profile.settings', compact('user', 'stats', 'recentActivity'));
+        // Get payment history
+        $paymentHistory = PaymentHistory::where('user_id', $user->id)
+            ->orderBy('transaction_date', 'desc')
+            ->take(20)
+            ->get();
+
+        return view('profile.settings', compact('user', 'stats', 'recentActivity', 'paymentHistory'));
     }
 
     /**
@@ -170,10 +177,10 @@ class ProfileController extends Controller
             $user = Auth::user();
             
             $stats = [
-                'total_watched' => VideoWatchProgress::where('user_id', $user->id)->count(),
-                'recent_activity' => VideoWatchProgress::where('user_id', $user->id)
-                    ->with('anime')
-                    ->orderBy('created_at', 'desc')
+                'total_watched' => VideoProgress::where('user_id', $user->id)->count(),
+                'recent_activity' => VideoProgress::where('user_id', $user->id)
+                    ->with('episode.anime')
+                    ->orderBy('updated_at', 'desc')
                     ->take(5)
                     ->get(),
             ];

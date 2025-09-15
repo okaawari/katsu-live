@@ -17,6 +17,8 @@ class PaymentHistory extends Model
         'user_id',
         'code',
         'refId',
+        'type',
+        'duration',
         'currency',
     ];
 

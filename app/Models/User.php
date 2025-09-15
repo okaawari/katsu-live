@@ -34,7 +34,9 @@ class User extends Authenticatable implements LaratrustUser
         'location',
         'website',
         'birth_date',
+        'subscription_date',
         'subscription_expires_at',
+        'subscription_type',
     ];
 
     /**
@@ -55,8 +57,8 @@ class User extends Authenticatable implements LaratrustUser
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'subscription_date' => 'datetime',
         'subscription_expires_at' => 'datetime',
-        'subscription_expired_at' => 'datetime',
         'birth_date' => 'date',
         'last_active_at' => 'datetime',
     ];

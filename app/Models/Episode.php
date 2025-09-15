@@ -125,7 +125,7 @@ class Episode extends Model
 
     public function watchProgress(): HasMany
     {
-        return $this->hasMany(VideoWatchProgress::class);
+        return $this->hasMany(VideoProgress::class);
     }
 
     public function episodeLists(): HasMany

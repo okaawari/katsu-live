@@ -58,7 +58,7 @@ class AnimeController extends Controller
             'title_japanese' => 'nullable|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'status' => 'required|in:ongoing,completed,upcoming,cancelled',
-            'total_episodes' => 'nullable|integer|min:1',
+            'total_episodes' => 'nullable|string|min:1',
             'visibility' => 'required|in:public,private,draft',
             'is_featured' => 'boolean',
             'cover_image' => 'nullable|image|max:2048',
@@ -83,11 +83,6 @@ class AnimeController extends Controller
         }
 
         $anime = Anime::create($validated);
-
-        // Attach tags
-        if ($request->has('tags')) {
-            $anime->tags()->attach($request->tags);
-        }
 
         return redirect()->route('admin.anime.index')
             ->with('success', 'Anime created successfully!');
@@ -115,7 +110,7 @@ class AnimeController extends Controller
             'title_japanese' => 'nullable|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'status' => 'required|in:ongoing,completed,upcoming,cancelled',
-            'total_episodes' => 'nullable|integer|min:1',
+            'total_episodes' => 'nullable|string|min:1',
             'visibility' => 'required|in:public,private,draft',
             'is_featured' => 'boolean',
             'cover_image' => 'nullable|image|max:2048',
@@ -149,13 +144,6 @@ class AnimeController extends Controller
         }
 
         $anime->update($validated);
-
-        // Sync tags
-        if ($request->has('tags')) {
-            $anime->tags()->sync($request->tags);
-        } else {
-            $anime->tags()->detach();
-        }
 
         return redirect()->route('admin.anime.index')
             ->with('success', 'Anime updated successfully!');

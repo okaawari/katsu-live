@@ -84,7 +84,7 @@
 
                 <div>
                     <label for="total_episodes" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Total Episodes</label>
-                    <input type="number" name="total_episodes" id="total_episodes" value="{{ old('total_episodes') }}" min="1"
+                    <input type="string" name="total_episodes" id="total_episodes" value="{{ old('total_episodes') }}" min="1"
                            class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     @error('total_episodes')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -156,24 +156,6 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-            </div>
-
-            <!-- Tags -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                    @foreach($tags as $tag)
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="tags[]" value="{{ $tag->id }}" 
-                                   {{ in_array($tag->id, old('tags', [])) ? 'checked' : '' }}
-                                   class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 dark:bg-gray-700">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $tag->display_name }}</span>
-                        </label>
-                    @endforeach
-                </div>
-                @error('tags')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
             </div>
 
             <!-- Additional Options -->

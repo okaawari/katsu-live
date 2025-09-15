@@ -71,7 +71,7 @@
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white">Subscription Settings</h3>
             </div>
             <div class="p-6">
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     <div>
                         <label for="subscription_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subscription Type</label>
                         <select name="subscription_type" id="subscription_type" 
@@ -86,6 +86,30 @@
                     </div>
 
                     <div>
+                        <label for="subscription_duration_days" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Duration (Days)</label>
+                        <input type="number" name="subscription_duration_days" id="subscription_duration_days" 
+                               min="1" max="365" placeholder="Enter days"
+                               class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        @error('subscription_duration_days')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="subscription_duration_months" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Duration (Months)</label>
+                        <select name="subscription_duration_months" id="subscription_duration_months" 
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">Select months</option>
+                            @for($i = 1; $i <= 12; $i++)
+                                <option value="{{ $i }}">{{ $i }} {{ $i == 1 ? 'month' : 'months' }}</option>
+                            @endfor
+                        </select>
+                        @error('subscription_duration_months')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
                         <label for="subscription_expires_at" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Expires At</label>
                         <input type="datetime-local" name="subscription_expires_at" id="subscription_expires_at" 
                                value="{{ old('subscription_expires_at') }}"
@@ -95,8 +119,69 @@
                         @enderror
                     </div>
                 </div>
+                
+                <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <p class="text-sm text-blue-800 dark:text-blue-200">
+                        <strong>Note:</strong> Enter either days or months to set the subscription duration. If both are provided, days will take priority. 
+                        The system will automatically calculate the expiration date and set the subscription start date.
+                    </p>
+                </div>
             </div>
         </div>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const daysInput = document.getElementById('subscription_duration_days');
+            const monthsSelect = document.getElementById('subscription_duration_months');
+            const expiresAtInput = document.getElementById('subscription_expires_at');
+            
+            // Function to calculate and update expiration date
+            function updateExpirationDate() {
+                const days = parseInt(daysInput.value) || 0;
+                const months = parseInt(monthsSelect.value) || 0;
+                
+                if (days > 0) {
+                    // Days take priority
+                    const newDate = new Date();
+                    newDate.setDate(newDate.getDate() + days);
+                    expiresAtInput.value = newDate.toISOString().slice(0, 16);
+                } else if (months > 0) {
+                    // Use months if no days specified
+                    const newDate = new Date();
+                    newDate.setMonth(newDate.getMonth() + months);
+                    expiresAtInput.value = newDate.toISOString().slice(0, 16);
+                }
+            }
+            
+            // Add event listeners
+            daysInput.addEventListener('input', function() {
+                if (this.value > 0) {
+                    monthsSelect.value = '';
+                }
+                updateExpirationDate();
+            });
+            
+            monthsSelect.addEventListener('change', function() {
+                if (this.value > 0) {
+                    daysInput.value = '';
+                }
+                updateExpirationDate();
+            });
+            
+            // Clear the other field when one is selected
+            daysInput.addEventListener('focus', function() {
+                if (monthsSelect.value) {
+                    monthsSelect.value = '';
+                }
+            });
+            
+            monthsSelect.addEventListener('focus', function() {
+                if (daysInput.value) {
+                    daysInput.value = '';
+                }
+            });
+        });
+        </script>
 
         <!-- User Status -->
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg">

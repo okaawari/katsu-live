@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('user_id'); // Contains user_id
             $table->string('code')->nullable(); // Code from API
             $table->string('refId'); // Reference ID
+            $table->integer('type')->default(0); // 0: Subscription, 1: Admin Extension
+            $table->date('duration')->nullable(); // Duration of the subscription
             $table->timestamps();
         });
     }

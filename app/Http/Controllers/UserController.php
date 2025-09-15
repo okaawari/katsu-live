@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\VideoWatchProgress;
+use App\Models\VideoProgress;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -23,9 +23,9 @@ class UserController extends Controller
         }
 
         // Get user's watching history
-        $watchingHistory = VideoWatchProgress::where('user_id', $user->id)
-            ->with('anime')
-            ->orderBy('created_at', 'desc')
+        $watchingHistory = VideoProgress::where('user_id', $user->id)
+            ->with('episode.anime')
+            ->orderBy('updated_at', 'desc')
             ->paginate(10);
 
         return view('user', compact('user', 'watchingHistory'));
@@ -92,10 +92,10 @@ class UserController extends Controller
             $user = Auth::user();
             
             $stats = [
-                'total_watched' => VideoWatchProgress::where('user_id', $user->id)->count(),
-                'recent_activity' => VideoWatchProgress::where('user_id', $user->id)
-                    ->with('anime')
-                    ->orderBy('created_at', 'desc')
+                'total_watched' => VideoProgress::where('user_id', $user->id)->count(),
+                'recent_activity' => VideoProgress::where('user_id', $user->id)
+                    ->with('episode.anime')
+                    ->orderBy('updated_at', 'desc')
                     ->take(5)
                     ->get(),
             ];

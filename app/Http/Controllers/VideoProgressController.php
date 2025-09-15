@@ -271,37 +271,4 @@ class VideoProgressController extends Controller
         return "video_progress:{$userId}:{$episodeId}";
     }
 
-    /**
-     * Check if user has any roles other than "User"
-     */
-    protected function hasNonUserRole($user): bool
-    {
-        // Get all user roles
-        $userRoles = $user->roles->pluck('name')->toArray();
-        
-        // If user has no roles, treat as basic user
-        if (empty($userRoles)) {
-            return false;
-        }
-
-        // If user only has "User" role, return false
-        if (count($userRoles) === 1 && in_array('User', $userRoles)) {
-            return false;
-        }
-
-        // If user has any role other than "User", return true
-        $nonUserRoles = array_filter($userRoles, function($role) {
-            return strtolower($role) !== 'user';
-        });
-
-        return !empty($nonUserRoles);
-    }
-
-    /**
-     * Build a unique Redis key for storing user + episode progress.
-     */
-    protected function buildRedisKey(int $userId, int $episodeId): string
-    {
-        return "video_progress:{$userId}:{$episodeId}";
-    }
 }

@@ -256,7 +256,7 @@
                     <input type="text" id="tag-search" placeholder="Search tags..." 
                            class="mb-4 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-green-500 focus:border-green-500">
                 </div>
-                <div id="tag-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+                <div id="tag-list" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h overflow-y-auto">
                     @foreach($tags as $tag)
                         <label class="inline-flex items-center tag-option" data-tag-name="{{ strtolower($tag->display_name) }}">
                             <input type="checkbox" name="tags[]" value="{{ $tag->id }}" 

@@ -23,6 +23,8 @@ use App\Models\Anime;
 // Public routes
 Route::view('/', 'welcome');
 Route::get('/transaction/test', [TransactionController::class, 'test']);
+// Terms & Conditions
+Route::view('/terms', 'terms')->name('terms');
 
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -53,10 +53,6 @@ new class extends Component
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             {{ __('Cover Image') }}
         </h2>
-
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            {{ __("Update your profile's cover image.") }}
-        </p>
     </header>
 
     <form wire:submit="updateCoverImage" class="mt-6 space-y-6" enctype="multipart/form-data">
